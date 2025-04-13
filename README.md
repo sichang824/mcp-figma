@@ -1,35 +1,35 @@
 # Figma MCP Server
 
-基于 Model Context Protocol (MCP)的 Figma API 服务器实现，支持 Figma 插件和小部件(Widget)集成。
+A Figma API server implementation based on Model Context Protocol (MCP), supporting Figma plugin and widget integration.
 
-## 功能特点
+## Features
 
-- 通过 MCP 与 Figma API 交互
-- WebSocket 服务器用于 Figma 插件通信
-- 支持 Figma 小部件开发
-- 支持命令行参数设置环境变量
-- 提供丰富的 Figma 操作工具
+- Interact with Figma API through MCP
+- WebSocket server for Figma plugin communication
+- Support for Figma widget development
+- Environment variable configuration via command line arguments
+- Rich set of Figma operation tools
 
-## 安装
+## Installation
 
-1. 克隆仓库:
+1. Clone the repository:
 
 ```bash
 git clone <repository-url>
 cd figma-mcp
 ```
 
-2. 安装依赖:
+2. Install dependencies:
 
 ```bash
 bun install
 ```
 
-## 配置
+## Configuration
 
-### 环境变量
+### Environment Variables
 
-创建一个`.env`文件并设置以下环境变量:
+Create a `.env` file and set the following environment variables:
 
 ```
 FIGMA_PERSONAL_ACCESS_TOKEN=your_figma_token
@@ -37,50 +37,50 @@ PORT=3001
 NODE_ENV=development
 ```
 
-### 获取 Figma 访问令牌
+### Getting a Figma Access Token
 
-1. 登录[Figma](https://www.figma.com/)
-2. 访问账户设置 > 个人访问令牌
-3. 创建新的访问令牌
-4. 将令牌复制到`.env`文件或通过命令行参数传递
+1. Log in to [Figma](https://www.figma.com/)
+2. Go to Account Settings > Personal Access Tokens
+3. Create a new access token
+4. Copy the token to your `.env` file or pass it via command line arguments
 
-## 使用方法
+## Usage
 
-### 构建项目
+### Build the Project
 
 ```bash
 bun run build
 ```
 
-### 运行开发服务器
+### Run the Development Server
 
 ```bash
 bun run dev
 ```
 
-### 使用命令行参数
+### Using Command Line Arguments
 
-支持通过`-e`参数设置环境变量:
+Support for setting environment variables via the `-e` parameter:
 
 ```bash
 bun --watch src/index.ts -e FIGMA_PERSONAL_ACCESS_TOKEN=your_token -e PORT=6000
 ```
 
-也可以使用专用的 token 参数:
+You can also use a dedicated token parameter:
 
 ```bash
 bun --watch src/index.ts --token your_token
 ```
 
-或简写:
+Or its shorthand:
 
 ```bash
 bun --watch src/index.ts -t your_token
 ```
 
-## 在 Cursor 中配置 MCP
+## Configuring MCP in Cursor
 
-在`.cursor/mcp.json`文件中添加:
+Add to the `.cursor/mcp.json` file:
 
 ```json
 {
@@ -98,77 +98,77 @@ bun --watch src/index.ts -t your_token
 }
 ```
 
-## 可用工具
+## Available Tools
 
-服务器提供以下 Figma 操作工具:
+The server provides the following Figma operation tools:
 
-- 文件操作: 获取文件、版本等
-- 节点操作: 获取和操作 Figma 节点
-- 注释操作: 管理 Figma 文件中的注释
-- 图像操作: 导出 Figma 元素为图像
-- 搜索功能: 在 Figma 文件中搜索内容
-- 组件操作: 管理 Figma 组件
-- 画布操作: 创建矩形、圆形、文本等
-- 小部件操作: 管理 Figma 小部件
+- File operations: Get files, versions, etc.
+- Node operations: Get and manipulate Figma nodes
+- Comment operations: Manage comments in Figma files
+- Image operations: Export Figma elements as images
+- Search functionality: Search content in Figma files
+- Component operations: Manage Figma components
+- Canvas operations: Create rectangles, circles, text, etc.
+- Widget operations: Manage Figma widgets
 
-## Figma 插件开发
+## Figma Plugin Development
 
-### 插件简介
+### Plugin Introduction
 
-Figma 插件是扩展 Figma 功能的定制化工具，可以自动化工作流程、添加新功能或与外部服务集成。本 MCP 服务器提供了便捷的方式来开发、测试和部署 Figma 插件。
+Figma plugins are customized tools that extend Figma's functionality, enabling workflow automation, adding new features, or integrating with external services. This MCP server provides a convenient way to develop, test, and deploy Figma plugins.
 
-### 构建与测试
+### Building and Testing
 
-构建插件:
+Build the plugin:
 
 ```bash
 bun run build:plugin
 ```
 
-在开发模式下运行:
+Run in development mode:
 
 ```bash
 bun run dev:plugin
 ```
 
-### 在 Figma 中加载插件
+### Loading the Plugin in Figma
 
 ![image](./docs/image.png)
 
-1. 在 Figma 中右键打开菜单 -> Plugins -> Development -> Import plugin from manifest...
-2. 选择插件 `manifest.json` 文件
-3. 现在你的插件将出现在 Figma 的插件菜单中
+1. Right-click in Figma to open the menu -> Plugins -> Development -> Import plugin from manifest...
+2. Select the plugin's `manifest.json` file
+3. Your plugin will now appear in Figma's plugin menu
 
-### 插件与 MCP 服务器交互
+### Plugin Interaction with MCP Server
 
-插件可以通过 WebSocket 与 MCP 服务器通信，实现:
+Plugins can communicate with the MCP server via WebSocket to achieve:
 
-- 复杂的数据处理
-- 外部 API 集成
-- 跨会话数据持久化
-- AI 功能集成
+- Complex data processing
+- External API integration
+- Cross-session data persistence
+- AI functionality integration
 
-## 开发
+## Development
 
-### 构建小部件
+### Build Widget
 
 ```bash
 bun run build:widget
 ```
 
-### 构建插件
+### Build Plugin
 
 ```bash
 bun run build:plugin
 ```
 
-### 开发模式
+### Development Mode
 
 ```bash
-bun run dev:widget  # 小部件开发模式
-bun run dev:plugin  # 插件开发模式
+bun run dev:widget  # Widget development mode
+bun run dev:plugin  # Plugin development mode
 ```
 
-## 许可证
+## License
 
 MIT
