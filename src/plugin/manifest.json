@@ -1,8 +1,8 @@
 {
-  "name": "Figma MCP 画布操作工具",
+  "name": "Figma MCP Canvas Operation Tool",
   "id": "figma-mcp-canvas-tools",
   "api": "1.0.0",
-  "main": "code.ts",
+  "main": "code.js",
   "ui": "ui.html",
   "editorType": ["figma"],
   "permissions": []
