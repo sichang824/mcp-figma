@@ -36,3 +36,11 @@ help:
 	@echo "  make build-mcp  - Build the MCP server"
 	@echo "  make test       - Run tests"
 	@echo "  make clean      - Remove build artifacts and dependencies"
+
+run-mcp-with-token:
+	FIGMA_PERSONAL_ACCESS_TOKEN=temporary_test_token bun run dist/mcp-index.js
+
+# Test the MCP server with a simple script
+test-mcp:
+	@echo "Starting MCP test..."
+	@node test-mcp.js | bun run dist/mcp-index.js

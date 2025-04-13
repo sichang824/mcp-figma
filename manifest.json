@@ -1,0 +1,10 @@
+{
+  "name": "MCP Figma Widget",
+  "id": "mcp-figma-widget",
+  "api": "1.0.0",
+  "main": "dist/widget-code.js",
+  "capabilities": ["network-access"],
+  "editorType": ["figma"],
+  "containsWidget": true,
+  "widgetApi": "1.0.0"
+}
