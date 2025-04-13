@@ -27,7 +27,7 @@ registerAllTools(server);
 registerAllResources(server);
 
 // Initialize WebSocket server for Figma plugin communication
-const wsPort = env.PORT || 3001;
+const wsPort = env.WEBSOCKET_PORT || 3001;
 initializeWebSocketServer(wsPort);
 
 // Start the MCP server with stdio transport

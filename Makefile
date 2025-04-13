@@ -59,4 +59,4 @@ help:
 # Test the MCP server with inspector
 mcp:
 	@echo "Starting MCP test with inspector..."
-	@npx @modelcontextprotocol/inspector bun run mcp -e FIGMA_PERSONAL_ACCESS_TOKEN=${FIGMA_PERSONAL_ACCESS_TOKEN}
+	@npx @modelcontextprotocol/inspector bun --watch src/index.ts -e FIGMA_PERSONAL_ACCESS_TOKEN=${FIGMA_PERSONAL_ACCESS_TOKEN} -e WEBSOCKET_PORT=3001
