@@ -8,10 +8,16 @@ import {
   createElementFromData,
   createElementsFromDataArray,
 } from "./creators/elementCreator";
-import { createArc, createCircle, createLine, createPolygon, createRectangle } from "./creators/shapeCreators";
-import { createText } from "./creators/textCreator";
+import {
+  createEllipseFromData,
+  createLineFromData,
+  createPolygonFromData,
+  createRectangleFromData,
+  createStarFromData
+} from "./creators/shapeCreators";
+import { createTextFromData } from "./creators/textCreator";
 import { hexToRgb } from "./utils/colorUtils";
-import { buildResultObject } from "./utils/nodeUtils";
+import { buildResultObject, selectAndFocusNodes } from "./utils/nodeUtils";
 
 // Show plugin UI
 figma.showUI(__html__, { width: 320, height: 500 });
@@ -19,69 +25,71 @@ figma.showUI(__html__, { width: 320, height: 500 });
 // Log that the plugin has loaded
 console.log("Figma MCP Plugin loaded");
 
+// Element creator mapping
+type ElementCreator = (params: any) => SceneNode | Promise<SceneNode>;
+
+const elementCreators: Record<string, ElementCreator> = {
+  "create-rectangle": createRectangleFromData,
+  "create-circle": createEllipseFromData,
+  "create-ellipse": createEllipseFromData,
+  "create-polygon": createPolygonFromData,
+  "create-line": createLineFromData,
+  "create-text": createTextFromData,
+  "create-star": createStarFromData,
+  "create-arc": (params: any) => {
+    const ellipse = createEllipseFromData(params);
+    if (params.arcData || (params.startAngle !== undefined && params.endAngle !== undefined)) {
+      ellipse.arcData = {
+        startingAngle: params.startAngle || params.arcData?.startingAngle || 0,
+        endingAngle: params.endAngle || params.arcData?.endingAngle || 360,
+        innerRadius: params.innerRadius || params.arcData?.innerRadius || 0
+      };
+    }
+    return ellipse;
+  }
+};
+
+// Generic element creation function
+async function createElement(type: string, params: any): Promise<SceneNode | null> {
+  console.log(`Creating ${type} with params:`, params);
+  
+  // Get the creator function
+  const creator = elementCreators[type];
+  if (!creator) {
+    console.error(`Unknown element type: ${type}`);
+    return null;
+  }
+  
+  try {
+    // Create the element (handle both synchronous and asynchronous creators)
+    const element = await Promise.resolve(creator(params));
+    
+    // Set position if provided
+    if (element && params) {
+      if (params.x !== undefined) element.x = params.x;
+      if (params.y !== undefined) element.y = params.y;
+    }
+    
+    // Select and focus the element
+    if (element) {
+      selectAndFocusNodes(element);
+    }
+    
+    return element;
+  } catch (error) {
+    console.error(`Error creating ${type}:`, error);
+    return null;
+  }
+}
+
 // Handle messages from UI
-figma.ui.onmessage = function (msg) {
+figma.ui.onmessage = async function (msg) {
   console.log("Received message from UI:", msg);
 
   // Handle different types of messages
-  if (msg.type === "create-rectangle") {
-    console.log("Creating rectangle with params:", msg);
-    createRectangle(
-      msg.x || 100,
-      msg.y || 100,
-      msg.width || 150,
-      msg.height || 150,
-      msg.color || "#ff0000"
-    );
-  } else if (msg.type === "create-circle") {
-    console.log("Creating circle with params:", msg);
-    createCircle(
-      msg.x || 100,
-      msg.y || 100,
-      msg.width || 150,
-      msg.height || 150,
-      msg.color || "#0000ff"
-    );
-  } else if (msg.type === "create-arc") {
-    console.log("Creating arc with params:", msg);
-    createArc(
-      msg.x || 100,
-      msg.y || 100,
-      msg.width || 150,
-      msg.height || 150,
-      msg.startAngle || 0,
-      msg.endAngle || 180,
-      msg.innerRadius || 0,
-      msg.color || "#00ff00"
-    );
-  } else if (msg.type === "create-polygon") {
-    console.log("Creating polygon with params:", msg);
-    createPolygon(
-      msg.x || 100,
-      msg.y || 100,
-      msg.width || 150,
-      msg.height || 150,
-      msg.pointCount || 3,
-      msg.color || "#ffcc00"
-    );
-  } else if (msg.type === "create-line") {
-    console.log("Creating line with params:", msg);
-    createLine(
-      msg.x || 100,
-      msg.y || 100,
-      msg.width || 150,
-      msg.color || "#000000",
-      msg.rotation || 0,
-      msg.strokeWeight || 1
-    );
-  } else if (msg.type === "create-text") {
-    console.log("Creating text with params:", msg);
-    createText(
-      msg.x || 100,
-      msg.y || 100,
-      msg.text || "Hello Figma!",
-      msg.fontSize || 24
-    );
+  if (elementCreators[msg.type]) {
+    // Element creation messages
+    await createElement(msg.type, msg);
   } else if (msg.type === "create-element") {
     // Unified create element method
     console.log("Creating element with data:", msg.data);
@@ -117,75 +125,22 @@ async function handleMcpCommand(command: string, params: any) {
     | null = null;
 
   try {
-    switch (command) {
+    // Convert command format from mcp (create_rectangle) to plugin (create-rectangle)
+    const pluginCommand = command.replace(/_/g, '-');
+    
+    switch (pluginCommand) {
       case "create-rectangle":
-        console.log("MCP command: Creating rectangle with params:", params);
-        result = createRectangle(
-          params.x || 100,
-          params.y || 100,
-          params.width || 150,
-          params.height || 150,
-          params.color || "#ff0000"
-        );
-        break;
-
       case "create-circle":
-        console.log("MCP command: Creating circle with params:", params);
-        result = createCircle(
-          params.x || 100,
-          params.y || 100,
-          params.width || 150,
-          params.height || 150,
-          params.color || "#0000ff"
-        );
-        break;
-
-      case "create-arc":
-        console.log("MCP command: Creating arc with params:", params);
-        result = createArc(
-          params.x || 100,
-          params.y || 100,
-          params.width || 150,
-          params.height || 150,
-          params.startAngle || 0,
-          params.endAngle || 180,
-          params.innerRadius || 0,
-          params.color || "#00ff00"
-        );
-        break;
-
       case "create-polygon":
-        console.log("MCP command: Creating polygon with params:", params);
-        result = createPolygon(
-          params.x || 100,
-          params.y || 100,
-          params.width || 150,
-          params.height || 150,
-          params.pointCount || 3,
-          params.color || "#ffcc00"
-        );
-        break;
-
       case "create-line":
-        console.log("MCP command: Creating line with params:", params);
-        result = createLine(
-          params.x || 100,
-          params.y || 100,
-          params.width || 150,
-          params.color || "#000000",
-          params.rotation || 0,
-          params.strokeWeight || 1
-        );
+      case "create-arc":
+        console.log(`MCP command: Creating ${pluginCommand.substring(7)} with params:`, params);
+        result = await createElement(pluginCommand, params);
         break;
 
       case "create-text":
         console.log("MCP command: Creating text with params:", params);
-        result = await createText(
-          params.x || 100,
-          params.y || 100,
-          params.text || "Hello from MCP!",
-          params.fontSize || 24
-        );
+        result = await createElement(pluginCommand, params);
         break;
 
       case "create-element":

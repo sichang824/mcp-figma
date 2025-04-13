@@ -387,6 +387,22 @@ export const polygonParams = {
   pointCount: z.number().int().min(3).default(3).describe("Number of sides of the polygon. Must be an integer >= 3.")
 };
 
+// Star parameters
+export const starParams = {
+  ...positionParams,
+  ...sizeParams,
+  ...baseNodeParams,
+  ...sceneNodeParams,
+  ...blendParams,
+  ...geometryParams,
+  ...layoutParams,
+  ...exportParams,
+  ...reactionParams,
+  ...annotationParams,
+  pointCount: z.number().int().min(3).default(5).describe("Number of points on the star. Must be an integer >= 3."),
+  innerRadius: z.number().min(0).max(1).default(0.5).describe("Ratio of inner radius to outer radius (0-1).")
+};
+
 // Complete schema definitions
 export const createRectangleSchema = z.object({
   ...rectangleParams
@@ -415,4 +431,9 @@ export const createLineSchema = z.object({
 // Polygon schema
 export const createPolygonSchema = z.object({
   ...polygonParams
+});
+
+// Star schema
+export const createStarSchema = z.object({
+  ...starParams
 }); 

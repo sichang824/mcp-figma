@@ -13,6 +13,7 @@ import {
   lineParams,
   polygonParams,
   rectangleParams,
+  starParams,
   textParams,
 } from "./zod-schemas.js";
 
@@ -236,6 +237,66 @@ export function registerCanvasTools(server: McpServer) {
           {
             type: "text",
             text: `Error creating polygon: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+          },
+          {
+            type: "text",
+            text: `Make sure the Figma plugin is running and connected to the MCP server.`,
+          },
+        ],
+      };
+    }
+  });
+
+  // Create a star in Figma
+  server.tool("create_star", starParams, async (params) => {
+    try {
+      // Prepare parameters for the plugin
+      const starParams = {
+        ...params,
+        pointCount: params.pointCount,
+        innerRadius: params.innerRadius
+      };
+
+      // Send command to Figma plugin
+      const response = await sendCommandToPlugin("create-star", starParams).catch(
+        (error: Error) => {
+          throw error;
+        }
+      );
+
+      if (!response.success) {
+        throw new Error(response.error || "Unknown error");
+      }
+
+      return {
+        content: [
+          { type: "text", text: `# Star Created Successfully` },
+          {
+            type: "text",
+            text: `A new star has been created in your Figma canvas.`,
+          },
+          {
+            type: "text",
+            text: `- Position: (${params.x}, ${params.y})\n- Size: ${params.width}×${params.height}px\n- Points: ${params.pointCount}\n- Inner Radius: ${params.innerRadius}\n- Color: ${params.color}`,
+          },
+          {
+            type: "text",
+            text:
+              response.result && response.result.id
+                ? `Node ID: ${response.result.id}`
+                : `Creation successful`,
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      logError("Error creating star in Figma", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating star: ${
               error instanceof Error ? error.message : "Unknown error"
             }`,
           },
