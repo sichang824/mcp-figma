@@ -111,6 +111,43 @@ bun --watch src/index.ts -t your_token
 - 画布操作: 创建矩形、圆形、文本等
 - 小部件操作: 管理 Figma 小部件
 
+## Figma 插件开发
+
+### 插件简介
+
+Figma 插件是扩展 Figma 功能的定制化工具，可以自动化工作流程、添加新功能或与外部服务集成。本 MCP 服务器提供了便捷的方式来开发、测试和部署 Figma 插件。
+
+### 构建与测试
+
+构建插件:
+
+```bash
+bun run build:plugin
+```
+
+在开发模式下运行:
+
+```bash
+bun run dev:plugin
+```
+
+### 在 Figma 中加载插件
+
+![image](./docs/image.png)
+
+1. 在 Figma 中右键打开菜单 -> Plugins -> Development -> Import plugin from manifest...
+2. 选择插件 `manifest.json` 文件
+3. 现在你的插件将出现在 Figma 的插件菜单中
+
+### 插件与 MCP 服务器交互
+
+插件可以通过 WebSocket 与 MCP 服务器通信，实现:
+
+- 复杂的数据处理
+- 外部 API 集成
+- 跨会话数据持久化
+- AI 功能集成
+
 ## 开发
 
 ### 构建小部件

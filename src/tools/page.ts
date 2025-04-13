@@ -3,7 +3,6 @@
  */
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-import figmaApi from "../services/figma-api.js";
 import {
   isPluginConnected,
   sendCommandToPlugin,
@@ -18,169 +17,97 @@ interface PageData {
 }
 
 export const getPagesTool = (server: McpServer) => {
-  server.tool(
-    "get_pages",
-    {
-      file_key: z
-        .string()
-        .optional()
-        .describe(
-          "The Figma file key to retrieve pages from (only needed for API access)"
-        ),
-    },
-    async ({ file_key }) => {
-      try {
-        // Try to get pages using WebSocket first if plugin is connected
-        if (isPluginConnected()) {
-          try {
-            const response = await sendCommandToPlugin("get-pages", {});
-
-            if (response.success && response.result) {
-              const pages = response.result || [];
-
-              return {
-                content: [
-                  { type: "text", text: `# Pages in Figma File` },
-                  { type: "text", text: `Found ${pages.length} pages:` },
-                  {
-                    type: "text",
-                    text: pages
-                      .map(
-                        (page: PageData) => `- ${page.name} (ID: ${page.id})`
-                      )
-                      .join("\n"),
-                  },
-                ],
-              };
-            }
-          } catch (wsError) {
-            // Fallback to API if WebSocket fails
-            console.error(
-              "WebSocket method failed, falling back to API:",
-              wsError
-            );
-          }
-        }
-
-        // Fallback to API method - requires file_key
-        if (!file_key) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Error: file_key is required when using API method`,
-              },
-            ],
-          };
-        }
-
-        const file = await figmaApi.getFile(file_key);
-        const pages = file.document.children || [];
-
-        return {
-          content: [
-            { type: "text", text: `# Pages in Figma File: ${file.name}` },
-            { type: "text", text: `Found ${pages.length} pages:` },
-            {
-              type: "text",
-              text: pages
-                .map((page) => `- ${page.name} (ID: ${page.id})`)
-                .join("\n"),
-            },
-          ],
-        };
-      } catch (error) {
-        console.error("Error fetching pages:", error);
+  server.tool("get_pages", {}, async () => {
+    try {
+      // Get pages using WebSocket only if plugin is connected
+      if (!isPluginConnected()) {
         return {
           content: [
             {
               type: "text",
-              text: `Error getting pages: ${(error as Error).message}`,
+              text: "No Figma plugin is connected. Please make sure the Figma plugin is running and connected to the MCP server.",
             },
           ],
         };
       }
+
+      const response = await sendCommandToPlugin("get-pages", {});
+
+      if (!response.success) {
+        throw new Error(response.error || "Failed to get pages");
+      }
+
+      // Process the response to handle different result formats
+      const result = response.result || {};
+      const pages = result.items || [];
+      const pagesCount = result.count || 0;
+
+      // Check if we have pages to display
+      if (pagesCount === 0 && !pages.length) {
+        return {
+          content: [
+            { type: "text", text: `# Pages in Figma File` },
+            { type: "text", text: `No pages found in the current Figma file.` },
+          ],
+        };
+      }
+
+      return {
+        content: [
+          { type: "text", text: `# Pages in Figma File` },
+          { type: "text", text: `Found ${pagesCount || pages.length} pages:` },
+          {
+            type: "text",
+            text: pages
+              .map((page: PageData) => `- ${page.name} (ID: ${page.id})`)
+              .join("\n"),
+          },
+        ],
+      };
+    } catch (error) {
+      console.error("Error fetching pages:", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error getting pages: ${(error as Error).message}`,
+          },
+        ],
+      };
     }
-  );
+  });
 };
 
 export const getPageTool = (server: McpServer) => {
   server.tool(
     "get_page",
     {
-      file_key: z
-        .string()
-        .optional()
-        .describe(
-          "The Figma file key to retrieve from (only needed for API access)"
-        ),
-      page_id: z.string().min(1).describe("The ID of the page to retrieve"),
+      page_id: z.string().min(1).describe("The ID of the page to retrieve").optional(),
     },
-    async ({ file_key, page_id }) => {
+    async ({ page_id }) => {
       try {
-        // Try to get page using WebSocket first if plugin is connected
-        if (isPluginConnected()) {
-          try {
-            const response = await sendCommandToPlugin("get-page", {
-              page_id,
-            });
-
-            if (response.success && response.result) {
-              const pageNode = response.result;
-
-              return {
-                content: [
-                  { type: "text", text: `# Page: ${pageNode.name}` },
-                  { type: "text", text: `ID: ${pageNode.id}` },
-                  { type: "text", text: `Type: ${pageNode.type}` },
-                  {
-                    type: "text",
-                    text: `Elements: ${pageNode.children?.length || 0}`,
-                  },
-                  {
-                    type: "text",
-                    text:
-                      "```json\n" + JSON.stringify(pageNode, null, 2) + "\n```",
-                  },
-                ],
-              };
-            }
-          } catch (wsError) {
-            // Fallback to API if WebSocket fails
-            console.error(
-              "WebSocket method failed, falling back to API:",
-              wsError
-            );
-          }
-        }
-
-        // Fallback to API method - requires file_key
-        if (!file_key) {
+        // Get page using WebSocket only if plugin is connected
+        if (!isPluginConnected()) {
           return {
             content: [
               {
                 type: "text",
-                text: `Error: file_key is required when using API method`,
+                text: "No Figma plugin is connected. Please make sure the Figma plugin is running and connected to the MCP server.",
               },
             ],
           };
         }
 
-        const fileNodes = await figmaApi.getFileNodes(file_key, [page_id]);
-        const pageData = fileNodes.nodes[page_id];
+        // If page_id is not provided, get the current page
+        const response = await sendCommandToPlugin("get-page", {
+          page_id,
+        });
 
-        if (!pageData) {
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Page ${page_id} not found in file ${file_key}`,
-              },
-            ],
-          };
+        if (!response.success) {
+          throw new Error(response.error || "Failed to get page");
         }
 
-        const pageNode = pageData.document;
+        const pageNode = response.result;
 
         return {
           content: [
@@ -189,7 +116,7 @@ export const getPageTool = (server: McpServer) => {
             { type: "text", text: `Type: ${pageNode.type}` },
             {
               type: "text",
-              text: `Elements: ${(pageNode as any).children?.length || 0}`,
+              text: `Elements: ${pageNode.children?.length || 0}`,
             },
             {
               type: "text",

@@ -136,28 +136,24 @@ async function handleMcpCommand(command: string, params: any) {
         result = figma.currentPage.selection;
         break;
 
-      case "get-current-page":
-        console.log("MCP command: Getting current page");
-        result = figma.currentPage;
-        break;
-
       case "get-pages":
         console.log("MCP command: Getting all pages");
         result = figma.root.children;
         break;
 
-      case "get-all-pages":
-        console.log("MCP command: Getting all pages (legacy command)");
-        result = figma.root.children;
-        break;
-
       case "get-page":
         console.log("MCP command: Getting page with ID:", params.page_id);
-        if (!params.page_id) throw new Error("Page ID is required");
-        const pageNode = figma.getNodeById(params.page_id);
-        if (!pageNode || pageNode.type !== "PAGE")
-          throw new Error("Invalid page ID or node is not a page");
-        result = pageNode;
+        if (!params.page_id) {
+          // If no page_id is provided, use the current page
+          console.log("No page_id provided, using current page");
+          result = figma.currentPage;
+        } else {
+          // If page_id is provided, find the page by ID
+          const pageNode = figma.getNodeById(params.page_id);
+          if (!pageNode || pageNode.type !== "PAGE")
+            throw new Error("Invalid page ID or node is not a page");
+          result = pageNode;
+        }
         break;
 
       case "create-page":

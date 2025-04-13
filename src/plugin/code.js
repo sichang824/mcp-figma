@@ -1000,6 +1000,38 @@ async function handleMcpCommand(command, params) {
         console.log("MCP command: Getting current selection");
         result = figma.currentPage.selection;
         break;
+      case "get-pages":
+        console.log("MCP command: Getting all pages");
+        result = figma.root.children;
+        break;
+      case "get-page":
+        console.log("MCP command: Getting page with ID:", params.page_id);
+        if (!params.page_id) {
+          console.log("No page_id provided, using current page");
+          result = figma.currentPage;
+        } else {
+          const pageNode = figma.getNodeById(params.page_id);
+          if (!pageNode || pageNode.type !== "PAGE")
+            throw new Error("Invalid page ID or node is not a page");
+          result = pageNode;
+        }
+        break;
+      case "create-page":
+        console.log("MCP command: Creating new page with name:", params.name);
+        const newPage = figma.createPage();
+        newPage.name = params.name || "New Page";
+        result = newPage;
+        break;
+      case "switch-page":
+        console.log("MCP command: Switching to page with ID:", params.id);
+        if (!params.id)
+          throw new Error("Page ID is required");
+        const switchPageNode = figma.getNodeById(params.id);
+        if (!switchPageNode || switchPageNode.type !== "PAGE")
+          throw new Error("Invalid page ID");
+        figma.currentPage = switchPageNode;
+        result = switchPageNode;
+        break;
       case "modify-rectangle":
         console.log("MCP command: Modifying rectangle with ID:", params.id);
         if (!params.id)
@@ -1024,7 +1056,17 @@ async function handleMcpCommand(command, params) {
         console.log("Unknown MCP command:", command);
         throw new Error("Unknown command: " + command);
     }
-    const resultObject = buildResultObject(result);
+    let resultForBuilder = null;
+    if (result === null) {
+      resultForBuilder = null;
+    } else if (Array.isArray(result)) {
+      resultForBuilder = result;
+    } else if ("type" in result && result.type === "PAGE") {
+      resultForBuilder = result;
+    } else {
+      resultForBuilder = result;
+    }
+    const resultObject = buildResultObject(resultForBuilder);
     console.log("Command result:", resultObject);
     figma.ui.postMessage({
       type: "mcp-response",
