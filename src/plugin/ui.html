@@ -1,344 +1,518 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      padding: 20px;
-    }
-    h2 {
-      font-size: 16px;
-      margin-bottom: 15px;
-    }
-    .control-group {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 12px;
-    }
-    input {
-      width: 100%;
-      padding: 6px;
-      margin-bottom: 10px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .button-group {
-      display: flex;
-      gap: 8px;
-      margin-top: 15px;
-    }
-    button {
-      background-color: #18A0FB;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      flex: 1;
-      font-size: 12px;
-    }
-    button:hover {
-      background-color: #0D8EE3;
-    }
-    button.cancel {
-      background-color: #F24822;
-    }
-    button.cancel:hover {
-      background-color: #D83B17;
-    }
-    .connection-status {
-      margin-top: 15px;
-      padding: 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      text-align: center;
-    }
-    .status-connected {
-      background-color: #ECFDF5;
-      color: #047857;
-    }
-    .status-disconnected {
-      background-color: #FEF2F2;
-      color: #B91C1C;
-    }
-    .mcp-section {
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 1px solid #E5E7EB;
-    }
-    .log-area {
-      margin-top: 10px;
-      height: 100px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 8px;
-      font-size: 11px;
-      font-family: monospace;
-      background-color: #F9FAFB;
-    }
-    .log-item {
-      margin-bottom: 4px;
-    }
-    .server-input {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-    .server-input input {
-      flex: 1;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h2>Figma MCP 画布操作工具</h2>
-    
-    <div class="control-group">
-      <label for="x">X 位置:</label>
-      <input type="number" id="x" value="100">
-      
-      <label for="y">Y 位置:</label>
-      <input type="number" id="y" value="100">
-    </div>
-    
-    <div class="control-group">
-      <label for="width">宽度:</label>
-      <input type="number" id="width" value="150">
-      
-      <label for="height">高度:</label>
-      <input type="number" id="height" value="150">
-    </div>
-    
-    <div class="control-group">
-      <label for="color">颜色:</label>
-      <input type="color" id="color" value="#ff0000">
-    </div>
-    
-    <div class="control-group">
-      <label for="text">文本:</label>
-      <input type="text" id="text" value="Hello Figma!">
-      
-      <label for="fontSize">字体大小:</label>
-      <input type="number" id="fontSize" value="24">
-    </div>
-    
-    <div class="button-group">
-      <button id="create-rectangle">矩形</button>
-      <button id="create-circle">圆形</button>
-      <button id="create-text">文本</button>
-    </div>
-    
-    <div class="mcp-section">
-      <h2>MCP 连接</h2>
-      <div class="server-input">
-        <input type="text" id="server-url" value="ws://localhost:3001/ws" placeholder="输入 MCP 服务器 WebSocket URL">
-        <button id="connect-button">连接</button>
-      </div>
-      
-      <div id="connection-status" class="connection-status status-disconnected">
-        未连接到 MCP
-      </div>
-      
-      <div class="log-area" id="log-area">
-        <div class="log-item">等待 MCP 连接和命令...</div>
-      </div>
-    </div>
-    
-    <div class="button-group">
-      <button class="cancel" id="cancel">关闭</button>
-    </div>
-  </div>
+  <head>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        padding: 20px;
+      }
+      h2 {
+        font-size: 16px;
+        margin-bottom: 15px;
+      }
+      .control-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 12px;
+      }
+      input {
+        width: 100%;
+        padding: 6px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .button-group {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+      }
+      button {
+        background-color: #18a0fb;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        flex: 1;
+        font-size: 12px;
+      }
+      button:hover {
+        background-color: #0d8ee3;
+      }
+      button.cancel {
+        background-color: #f24822;
+      }
+      button.cancel:hover {
+        background-color: #d83b17;
+      }
+      .connection-status {
+        margin-top: 15px;
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        text-align: center;
+      }
+      .status-connected {
+        background-color: #ecfdf5;
+        color: #047857;
+      }
+      .status-disconnected {
+        background-color: #fef2f2;
+        color: #b91c1c;
+      }
+      .status-connecting {
+        background-color: #fef3c7;
+        color: #92400e;
+      }
+      .mcp-section {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #e5e7eb;
+      }
+      .log-area {
+        margin-top: 10px;
+        height: 100px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 8px;
+        font-size: 11px;
+        font-family: monospace;
+        background-color: #f9fafb;
+      }
+      .log-item {
+        margin-bottom: 4px;
+      }
+      .server-input {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .server-input input {
+        flex: 1;
+      }
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .checkbox-group input[type="checkbox"] {
+        width: auto;
+        margin-right: 8px;
+      }
+      .checkbox-group label {
+        display: inline;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Figma MCP 画布操作工具</h2>
 
-  <script>
-    // 获取所有输入元素
-    const xInput = document.getElementById('x');
-    const yInput = document.getElementById('y');
-    const widthInput = document.getElementById('width');
-    const heightInput = document.getElementById('height');
-    const colorInput = document.getElementById('color');
-    const textInput = document.getElementById('text');
-    const fontSizeInput = document.getElementById('fontSize');
-    const connectionStatus = document.getElementById('connection-status');
-    const logArea = document.getElementById('log-area');
-    const serverUrlInput = document.getElementById('server-url');
-    const connectButton = document.getElementById('connect-button');
-    
-    // MCP 连接状态和 WebSocket 对象
-    let mcpConnected = false;
-    let ws = null;
-    
-    // 添加按钮事件监听器
-    document.getElementById('create-rectangle').onclick = () => {
-      parent.postMessage({
-        pluginMessage: {
-          type: 'create-rectangle',
-          x: parseInt(xInput.value),
-          y: parseInt(yInput.value),
-          width: parseInt(widthInput.value),
-          height: parseInt(heightInput.value),
-          color: colorInput.value
-        }
-      }, '*');
-    };
-    
-    document.getElementById('create-circle').onclick = () => {
-      parent.postMessage({
-        pluginMessage: {
-          type: 'create-circle',
-          x: parseInt(xInput.value),
-          y: parseInt(yInput.value),
-          width: parseInt(widthInput.value),
-          height: parseInt(heightInput.value),
-          color: colorInput.value
-        }
-      }, '*');
-    };
-    
-    document.getElementById('create-text').onclick = () => {
-      parent.postMessage({
-        pluginMessage: {
-          type: 'create-text',
-          x: parseInt(xInput.value),
-          y: parseInt(yInput.value),
-          text: textInput.value,
-          fontSize: parseInt(fontSizeInput.value)
-        }
-      }, '*');
-    };
-    
-    document.getElementById('cancel').onclick = () => {
-      parent.postMessage({
-        pluginMessage: { type: 'cancel' }
-      }, '*');
-    };
-    
-    // 添加日志条目
-    function addLogEntry(message) {
-      const logItem = document.createElement('div');
-      logItem.classList.add('log-item');
-      logItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-      logArea.appendChild(logItem);
-      logArea.scrollTop = logArea.scrollHeight;
-    }
-    
-    // 设置 MCP 连接状态
-    function setMcpConnectionStatus(connected) {
-      mcpConnected = connected;
-      connectionStatus.className = connected 
-        ? 'connection-status status-connected' 
-        : 'connection-status status-disconnected';
-      connectionStatus.textContent = connected 
-        ? '已连接到 MCP' 
-        : '未连接到 MCP';
-      
-      addLogEntry(connected ? 'MCP 已连接' : 'MCP 已断开连接');
-      
-      // 更新连接按钮文本
-      connectButton.textContent = connected ? '断开' : '连接';
-    }
-    
-    // 连接到 MCP 服务器
-    function connectToMcp() {
-      if (ws) {
-        // 如果已经有连接，则断开
-        ws.close();
-        ws = null;
-        return;
+      <div class="control-group">
+        <label for="x">X 位置:</label>
+        <input type="number" id="x" value="100" />
+
+        <label for="y">Y 位置:</label>
+        <input type="number" id="y" value="100" />
+      </div>
+
+      <div class="control-group">
+        <label for="width">宽度:</label>
+        <input type="number" id="width" value="150" />
+
+        <label for="height">高度:</label>
+        <input type="number" id="height" value="150" />
+      </div>
+
+      <div class="control-group">
+        <label for="color">颜色:</label>
+        <input type="color" id="color" value="#ff0000" />
+      </div>
+
+      <div class="control-group">
+        <label for="text">文本:</label>
+        <input type="text" id="text" value="Hello Figma!" />
+
+        <label for="fontSize">字体大小:</label>
+        <input type="number" id="fontSize" value="24" />
+      </div>
+
+      <div class="button-group">
+        <button id="create-rectangle">矩形</button>
+        <button id="create-circle">圆形</button>
+        <button id="create-text">文本</button>
+      </div>
+
+      <div class="mcp-section">
+        <h2>MCP 连接</h2>
+        <div class="server-input">
+          <input
+            type="text"
+            id="server-url"
+            value="ws://localhost:3001/ws"
+            placeholder="输入 MCP 服务器 WebSocket URL"
+          />
+          <button id="connect-button">连接</button>
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="auto-reconnect" checked />
+          <label for="auto-reconnect">自动重连</label>
+        </div>
+
+        <div
+          id="connection-status"
+          class="connection-status status-disconnected"
+        >
+          未连接到 MCP
+        </div>
+
+        <div class="log-area" id="log-area">
+          <div class="log-item">等待 MCP 连接和命令...</div>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button class="cancel" id="cancel">关闭</button>
+      </div>
+    </div>
+
+    <script>
+      // 获取所有输入元素
+      const xInput = document.getElementById("x");
+      const yInput = document.getElementById("y");
+      const widthInput = document.getElementById("width");
+      const heightInput = document.getElementById("height");
+      const colorInput = document.getElementById("color");
+      const textInput = document.getElementById("text");
+      const fontSizeInput = document.getElementById("fontSize");
+      const connectionStatus = document.getElementById("connection-status");
+      const logArea = document.getElementById("log-area");
+      const serverUrlInput = document.getElementById("server-url");
+      const connectButton = document.getElementById("connect-button");
+      const autoReconnectCheckbox = document.getElementById("auto-reconnect");
+
+      // MCP 连接状态和 WebSocket 对象
+      let mcpConnected = false;
+      let ws = null;
+      let isConnecting = false;
+      let isManualDisconnect = false;
+      let retryCount = 0;
+      let maxRetries = 10;
+      let reconnectTimer = null;
+
+      // 添加按钮事件监听器
+      document.getElementById("create-rectangle").onclick = () => {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "create-rectangle",
+              x: parseInt(xInput.value),
+              y: parseInt(yInput.value),
+              width: parseInt(widthInput.value),
+              height: parseInt(heightInput.value),
+              color: colorInput.value,
+            },
+          },
+          "*"
+        );
+      };
+
+      document.getElementById("create-circle").onclick = () => {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "create-circle",
+              x: parseInt(xInput.value),
+              y: parseInt(yInput.value),
+              width: parseInt(widthInput.value),
+              height: parseInt(heightInput.value),
+              color: colorInput.value,
+            },
+          },
+          "*"
+        );
+      };
+
+      document.getElementById("create-text").onclick = () => {
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "create-text",
+              x: parseInt(xInput.value),
+              y: parseInt(yInput.value),
+              text: textInput.value,
+              fontSize: parseInt(fontSizeInput.value),
+            },
+          },
+          "*"
+        );
+      };
+
+      document.getElementById("cancel").onclick = () => {
+        parent.postMessage(
+          {
+            pluginMessage: { type: "cancel" },
+          },
+          "*"
+        );
+      };
+
+      // 添加日志条目
+      function addLogEntry(message) {
+        const logItem = document.createElement("div");
+        logItem.classList.add("log-item");
+        logItem.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        logArea.appendChild(logItem);
+        logArea.scrollTop = logArea.scrollHeight;
       }
-      
-      const serverUrl = serverUrlInput.value.trim();
-      if (!serverUrl) {
-        addLogEntry('错误: 服务器 URL 不能为空');
-        return;
+
+      // 设置 MCP 连接状态
+      function setMcpConnectionStatus(status) {
+        if (status === "connected") {
+          mcpConnected = true;
+          isConnecting = false;
+          connectionStatus.className = "connection-status status-connected";
+          connectionStatus.textContent = "已连接到 MCP";
+          connectButton.textContent = "断开";
+          addLogEntry("MCP 已连接");
+          retryCount = 0;
+        } else if (status === "connecting") {
+          mcpConnected = false;
+          isConnecting = true;
+          connectionStatus.className = "connection-status status-connecting";
+          connectionStatus.textContent = `正在连接 MCP (尝试 ${
+            retryCount + 1
+          }/${maxRetries})`;
+          connectButton.textContent = "取消";
+          addLogEntry(`尝试连接 MCP (${retryCount + 1}/${maxRetries})...`);
+        } else {
+          // disconnected
+          mcpConnected = false;
+          isConnecting = false;
+          connectionStatus.className = "connection-status status-disconnected";
+          connectionStatus.textContent = "未连接到 MCP";
+          connectButton.textContent = "连接";
+          addLogEntry("MCP 已断开连接");
+        }
       }
-      
-      try {
-        addLogEntry(`正在连接到 ${serverUrl}...`);
-        
-        // 创建 WebSocket 连接
-        ws = new WebSocket(serverUrl);
-        
-        ws.onopen = function() {
-          setMcpConnectionStatus(true);
-          addLogEntry('已连接到 MCP 服务器');
-          
-          // 发送初始化消息
-          ws.send(JSON.stringify({
-            type: 'figma-plugin-connected',
-            pluginId: 'figma-mcp-canvas-tools'
-          }));
-        };
-        
-        ws.onmessage = function(event) {
+
+      // 计算重连延迟，使用指数退避策略
+      function getReconnectDelay() {
+        // 1秒, 2秒, 4秒, 8秒...
+        return Math.min(1000 * Math.pow(2, retryCount), 30000);
+      }
+
+      // 清除所有重连定时器
+      function clearReconnectTimer() {
+        if (reconnectTimer) {
+          clearTimeout(reconnectTimer);
+          reconnectTimer = null;
+        }
+      }
+
+      // 重置连接状态
+      function resetConnectionState() {
+        isConnecting = false;
+        isManualDisconnect = false;
+        clearReconnectTimer();
+
+        if (ws) {
           try {
-            const message = JSON.parse(event.data);
-            addLogEntry(`收到 MCP 命令: ${message.command}`);
-            
-            // 转发给插件代码
-            parent.postMessage({
-              pluginMessage: {
-                type: 'mcp-command',
-                command: message.command,
-                params: message.params || {}
-              }
-            }, '*');
-          } catch (error) {
-            addLogEntry(`解析消息错误: ${error.message}`);
+            ws.close();
+          } catch (e) {
+            // 忽略关闭错误
           }
-        };
-        
-        ws.onclose = function() {
-          setMcpConnectionStatus(false);
-          addLogEntry('与 MCP 服务器的连接已关闭');
           ws = null;
-        };
-        
-        ws.onerror = function(error) {
-          addLogEntry(`WebSocket 错误: ${error.message || '未知错误'}`);
-          setMcpConnectionStatus(false);
-        };
-        
-      } catch (error) {
-        addLogEntry(`连接错误: ${error.message}`);
-        setMcpConnectionStatus(false);
-      }
-    }
-    
-    // 连接按钮点击事件
-    connectButton.addEventListener('click', connectToMcp);
-    
-    // 监听来自插件代码的消息
-    window.addEventListener('message', (event) => {
-      // 安全检查，确保消息来自预期的源
-      if (event.source !== window.parent) return;
-      
-      const message = event.data.pluginMessage;
-      
-      // 处理来自插件代码的消息
-      if (message && message.type === 'mcp-response') {
-        addLogEntry(`命令 ${message.command} ${message.success ? '成功执行' : '执行失败'}`);
-        
-        // 如果连接了 MCP 服务器，则将响应发送给服务器
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({
-            type: 'figma-plugin-response',
-            success: message.success,
-            command: message.command,
-            result: message.result,
-            error: message.error
-          }));
         }
       }
-    });
-  </script>
-</body>
-</html> 
+
+      // 尝试重连
+      function attemptReconnect() {
+        if (
+          isManualDisconnect ||
+          !autoReconnectCheckbox.checked ||
+          retryCount >= maxRetries
+        ) {
+          if (retryCount >= maxRetries) {
+            addLogEntry(`已达到最大重试次数 (${maxRetries})，停止重连`);
+          }
+          setMcpConnectionStatus("disconnected");
+          retryCount = 0;
+          return;
+        }
+
+        retryCount++;
+        setMcpConnectionStatus("connecting");
+
+        const delay = getReconnectDelay();
+        addLogEntry(`将在 ${delay / 1000}秒后重新连接...`);
+
+        clearReconnectTimer();
+        reconnectTimer = setTimeout(() => {
+          connectToMcp();
+        }, delay);
+      }
+
+      // 连接到 MCP 服务器
+      function connectToMcp() {
+        // 如果已经连接或正在连接，返回
+        if (mcpConnected) {
+          // 如果已连接，则断开
+          isManualDisconnect = true;
+          resetConnectionState();
+          setMcpConnectionStatus("disconnected");
+          return;
+        }
+
+        // 如果正在尝试连接，则取消
+        if (isConnecting) {
+          isManualDisconnect = true;
+          resetConnectionState();
+          setMcpConnectionStatus("disconnected");
+          return;
+        }
+
+        // 清除之前的连接
+        resetConnectionState();
+        isManualDisconnect = false;
+
+        const serverUrl = serverUrlInput.value.trim();
+        if (!serverUrl) {
+          addLogEntry("错误: 服务器 URL 不能为空");
+          return;
+        }
+
+        try {
+          setMcpConnectionStatus("connecting");
+
+          // 创建 WebSocket 连接
+          ws = new WebSocket(serverUrl);
+
+          ws.onopen = function () {
+            setMcpConnectionStatus("connected");
+
+            // 发送初始化消息
+            ws.send(
+              JSON.stringify({
+                type: "figma-plugin-connected",
+                pluginId: "figma-mcp-canvas-tools",
+              })
+            );
+          };
+
+          ws.onmessage = function (event) {
+            try {
+              const message = JSON.parse(event.data);
+              addLogEntry(`收到 MCP 命令: ${message.command}`);
+
+              // 转发给插件代码
+              parent.postMessage(
+                {
+                  pluginMessage: {
+                    type: "mcp-command",
+                    command: message.command,
+                    params: message.params || {},
+                  },
+                },
+                "*"
+              );
+            } catch (error) {
+              addLogEntry(`解析消息错误: ${error.message}`);
+            }
+          };
+
+          ws.onclose = function () {
+            // 只有在不是手动断开连接的情况下才尝试重连
+            if (!isManualDisconnect) {
+              addLogEntry("与 MCP 服务器的连接已关闭");
+              attemptReconnect();
+            } else {
+              setMcpConnectionStatus("disconnected");
+            }
+            ws = null;
+          };
+
+          ws.onerror = function (error) {
+            addLogEntry(`WebSocket 错误: ${error.message || "未知错误"}`);
+            // 错误会触发关闭事件，关闭事件会处理重连
+          };
+        } catch (error) {
+          addLogEntry(`连接错误: ${error.message}`);
+          attemptReconnect();
+        }
+      }
+
+      // 连接按钮点击事件
+      connectButton.addEventListener("click", connectToMcp);
+
+      // 自动重连选项变更
+      autoReconnectCheckbox.addEventListener("change", function () {
+        if (this.checked) {
+          addLogEntry("自动重连已启用");
+          // 如果目前未连接并且不是手动断开，尝试立即连接
+          if (!mcpConnected && !isManualDisconnect && !isConnecting) {
+            retryCount = 0;
+            connectToMcp();
+          }
+        } else {
+          addLogEntry("自动重连已禁用");
+          isManualDisconnect = true;
+          clearReconnectTimer();
+        }
+      });
+
+      // 监听来自插件代码的消息
+      window.addEventListener("message", (event) => {
+        // 安全检查，确保消息来自预期的源
+        if (event.source !== window.parent) return;
+
+        const message = event.data.pluginMessage;
+
+        // 处理来自插件代码的消息
+        if (message && message.type === "mcp-response") {
+          addLogEntry(
+            `命令 ${message.command} ${
+              message.success ? "成功执行" : "执行失败"
+            }`
+          );
+
+          // 如果连接了 MCP 服务器，则将响应发送给服务器
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(
+              JSON.stringify({
+                type: "figma-plugin-response",
+                success: message.success,
+                command: message.command,
+                result: message.result,
+                error: message.error,
+              })
+            );
+          }
+        }
+      });
+
+      // 页面加载后自动尝试连接
+      window.addEventListener("load", () => {
+        if (autoReconnectCheckbox.checked) {
+          // 小延迟后开始连接，给 UI 渲染一些时间
+          setTimeout(() => {
+            connectToMcp();
+          }, 1000);
+        }
+      });
+    </script>
+  </body>
+</html>
