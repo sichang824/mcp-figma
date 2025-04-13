@@ -7,9 +7,9 @@
   "scripts": {
     "start": "bun run dist/index.js",
     "dev": "bun --watch src/index.ts",
-    "mcp": "bun --watch src/mcp-index.ts",
+    "mcp": "bun --watch src/index.ts",
     "build": "bun build src/index.ts --outdir dist --target node",
-    "build:mcp": "bun build src/mcp-index.ts --outdir dist --target node",
+    "build:mcp": "bun build src/index.ts --outdir dist --target node",
     "build:widget": "bun build src/widget/widget.tsx --outfile dist/widget-code.js --target browser",
     "dev:widget": "bun build src/widget/widget.tsx --outfile dist/widget-code.js --target browser --watch",
     "test": "bun test"
@@ -38,6 +38,7 @@
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.109.0",
+    "@modelcontextprotocol/inspector": "^0.8.2",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/js-yaml": "^4.0.9",

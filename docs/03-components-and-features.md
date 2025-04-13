@@ -7,6 +7,7 @@ This document provides detailed information about the key components and feature
 ### Environment Configuration (`src/config/env.ts`)
 
 The environment configuration component:
+
 - Loads variables from `.env` file using dotenv
 - Validates environment variables using Zod schema
 - Provides type-safe access to configuration values
@@ -17,14 +18,17 @@ The environment configuration component:
 // Example of environment validation
 const envSchema = z.object({
   FIGMA_PERSONAL_ACCESS_TOKEN: z.string().min(1),
-  PORT: z.string().default('3001').transform(Number),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  PORT: z.string().default("3001").transform(Number),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
 });
 ```
 
 ### Figma API Service (`src/services/figma-api.ts`)
 
 A comprehensive service for interacting with the Figma API:
+
 - Uses official Figma API TypeScript definitions
 - Provides methods for all relevant API endpoints
 - Handles authentication and request formatting
@@ -39,10 +43,10 @@ A comprehensive service for interacting with the Figma API:
 
 ```typescript
 // Example method for retrieving a Figma file
-async getFile(fileKey: string, params: { 
-  ids?: string; 
-  depth?: number; 
-  geometry?: string 
+async getFile(fileKey: string, params: {
+  ids?: string;
+  depth?: number;
+  geometry?: string
 } = {}): Promise<GetFileResponse> {
   const response = await axios.get(`${FIGMA_API_BASE_URL}/files/${fileKey}`, {
     headers: this.headers,
@@ -55,6 +59,7 @@ async getFile(fileKey: string, params: {
 ### Figma Utilities (`src/utils/figma-utils.ts`)
 
 Utility functions for working with Figma data:
+
 - Node search and traversal
 - Text extraction
 - Property formatting
@@ -68,9 +73,10 @@ static findNodeById(file: GetFileResponse, nodeId: string): Node | null {
 }
 ```
 
-### MCP Server Implementation (`src/mcp-index.ts`)
+### MCP Server Implementation (`src/index.ts`)
 
 The main MCP server implementation:
+
 - Configures the MCP server
 - Defines tools and resources
 - Handles communication via standard I/O
@@ -80,7 +86,7 @@ The main MCP server implementation:
 // Example of MCP server configuration
 const server = new McpServer({
   name: "Figma API",
-  version: "1.0.0"
+  version: "1.0.0",
 });
 ```
 
@@ -91,6 +97,7 @@ The server provides the following tools:
 ### `get_file`
 
 Retrieves a Figma file by key:
+
 - Parameters:
   - `file_key`: The Figma file key
   - `return_full_file`: Whether to return the full file structure
@@ -103,6 +110,7 @@ Retrieves a Figma file by key:
 ### `get_node`
 
 Retrieves a specific node from a Figma file:
+
 - Parameters:
   - `file_key`: The Figma file key
   - `node_id`: The ID of the node to retrieve
@@ -114,6 +122,7 @@ Retrieves a specific node from a Figma file:
 ### `get_comments`
 
 Retrieves comments from a Figma file:
+
 - Parameters:
   - `file_key`: The Figma file key
 - Returns:
@@ -125,6 +134,7 @@ Retrieves comments from a Figma file:
 ### `get_images`
 
 Exports nodes as images:
+
 - Parameters:
   - `file_key`: The Figma file key
   - `node_ids`: Array of node IDs to export
@@ -137,6 +147,7 @@ Exports nodes as images:
 ### `get_file_versions`
 
 Retrieves version history for a file:
+
 - Parameters:
   - `file_key`: The Figma file key
 - Returns:
@@ -148,6 +159,7 @@ Retrieves version history for a file:
 ### `search_text`
 
 Searches for text within a Figma file:
+
 - Parameters:
   - `file_key`: The Figma file key
   - `search_text`: The text to search for
@@ -159,6 +171,7 @@ Searches for text within a Figma file:
 ### `get_components`
 
 Retrieves components from a Figma file:
+
 - Parameters:
   - `file_key`: The Figma file key
 - Returns:
@@ -170,6 +183,7 @@ Retrieves components from a Figma file:
 ### `add_comment`
 
 Adds a comment to a Figma file:
+
 - Parameters:
   - `file_key`: The Figma file key
   - `message`: The comment text
@@ -186,6 +200,7 @@ The server provides the following resource templates:
 ### `figma-file://{file_key}`
 
 Provides access to Figma files:
+
 - URI format: `figma-file://{file_key}`
 - List URI: `figma-file://`
 - Returns:
@@ -196,6 +211,7 @@ Provides access to Figma files:
 ### `figma-node://{file_key}/{node_id}`
 
 Provides access to nodes within Figma files:
+
 - URI format: `figma-node://{file_key}/{node_id}`
 - List URI: `figma-node://{file_key}`
 - Returns:
@@ -206,6 +222,7 @@ Provides access to nodes within Figma files:
 ## 4. Error Handling
 
 The server implements comprehensive error handling:
+
 - API request errors
 - Authentication failures
 - Invalid parameters
@@ -213,6 +230,7 @@ The server implements comprehensive error handling:
 - Server errors
 
 Each error is properly formatted and returned to the client with:
+
 - Error message
 - Error type
 - Context information (when available)
@@ -220,6 +238,7 @@ Each error is properly formatted and returned to the client with:
 ## 5. Response Formatting
 
 Responses are formatted for optimal consumption by AI assistants:
+
 - Clear headings
 - Structured information
 - Formatted lists

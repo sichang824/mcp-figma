@@ -1,81 +1,72 @@
 # Figma MCP Server
 
-An MCP (Model Context Protocol) server for interacting with the Figma API. This server allows AI assistants and other applications to access and manipulate Figma files through the MCP protocol.
+A Model Context Protocol (MCP) server for Figma that allows AI assistants to interact with Figma files.
 
 ## Features
 
-- Access Figma files and nodes
-- Search for text in Figma files
-- Get comments and add new comments
-- Export images from Figma files
-- View file versions and history
-- Access components and styles
-- Use resource templates for consistent access patterns
+- Fetch Figma file data and node information
+- Download images and assets from Figma files
+- Simplified response format for easier processing by AI models
 
-## Prerequisites
+## Requirements
 
-- [Bun](https://bun.sh/) (v1.0.0 or higher)
-- Figma API personal access token
+- Node.js v18+ or Bun runtime
+- Figma Personal Access Token
 
 ## Installation
 
-1. Clone this repository
-2. Install dependencies:
-   ```bash
-   make install
-   ```
-3. Create a `.env` file based on `.env.example` and add your Figma API token:
-   ```
-   FIGMA_PERSONAL_ACCESS_TOKEN=your_figma_token_here
-   ```
+1. Clone the repository
+2. Install dependencies: `bun install`
+3. Copy `.env.example` to `.env` and add your Figma Personal Access Token
 
 ## Usage
 
 ### Start the MCP Server
 
-```bash
-make mcp
-```
 
-This will start the MCP server in development mode with auto-reload.
 
-### Build for Production
+The server will start on port 3001 by default (configurable via the PORT environment variable).
 
-```bash
-make build-mcp
-```
+### MCP Endpoints
 
-Then start the server:
-
-```bash
-make start
-```
+- SSE Connection: `http://localhost:3001/sse`
+- Messages: `http://localhost:3001/messages`
 
 ## Available Tools
 
-- `get_file` - Retrieve a Figma file by key
-- `get_node` - Get a specific node from a Figma file
-- `get_comments` - Get all comments from a file
-- `get_images` - Export images from file nodes
-- `get_file_versions` - Get version history for a file
-- `search_text` - Search for text in a Figma file
-- `get_components` - Get components from a file
-- `add_comment` - Add a new comment to a file
+The MCP server provides the following tools:
 
-## Resource Templates
+### get_figma_data
 
-- `figma-file://{file_key}` - Access Figma files
-- `figma-node://{file_key}/{node_id}` - Access nodes within Figma files
+Fetch data from a Figma file or specific node.
 
-## Development
+Parameters:
+- `fileKey` (string): The Figma file key
+- `nodeId` (string, optional): The specific node to fetch
+- `depth` (number, optional): How many levels deep to traverse
 
-For development with auto-reload:
+### download_figma_images
 
-```bash
-make dev
-```
+Download images from a Figma file.
 
-Run tests:
+Parameters:
+- `fileKey` (string): The Figma file key
+- `nodes` (array): Array of node objects to download
+  - `nodeId` (string): The ID of the Figma image node
+  - `imageRef` (string, optional): For image fill references
+  - `fileName` (string): Local filename to save as
+- `localPath` (string): Directory path to save images
+
+## Environment Variables
+
+- `FIGMA_PERSONAL_ACCESS_TOKEN`: Your Figma Personal Access Token
+- `PORT`: The port to run the server on (default: 3001)
+- `NODE_ENV`: Set to "development" for more detailed logs
+
+## License
+
+MIT
+:
 
 ```bash
 make test
