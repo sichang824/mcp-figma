@@ -7,11 +7,11 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import * as dotenv from "dotenv";
+import { env } from "./config/env.js";
 import { registerAllResources } from "./resources.js";
-import { initializeWebSocketServer } from "./tools/canvas.js";
+import { initializeWebSocketServer } from "./services/websocket.js";
 import { registerAllTools } from "./tools/index.js";
 import { log } from "./utils.js";
-import { env } from "./config/env.js";
 
 // Load environment variables
 dotenv.config();
@@ -36,3 +36,5 @@ server.connect(transport);
 
 // Use logger utility to avoid interfering with stdout used by MCP
 log("Figma MCP Server started");
+
+export { server };
