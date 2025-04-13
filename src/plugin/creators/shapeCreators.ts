@@ -387,9 +387,103 @@ export function createArc(
  */
 export function createVectorFromData(data: any): VectorNode {
   const vector = figma.createVector();
-  vector.resize(data.width || 100, data.height || 100);
+  
+  try {
+    // Resize the vector
+    vector.resize(data.width || 100, data.height || 100);
 
-  // More complex vector operations would go here
+    // Set vector-specific properties
+    if (data.vectorNetwork) {
+      vector.vectorNetwork = data.vectorNetwork;
+    }
+
+    if (data.vectorPaths) {
+      vector.vectorPaths = data.vectorPaths;
+    }
+
+    if (data.handleMirroring) {
+      vector.handleMirroring = data.handleMirroring;
+    }
+
+    // Fill
+    if (data.fills) {
+      vector.fills = data.fills;
+    } else if (data.fill) {
+      if (typeof data.fill === "string") {
+        vector.fills = [createSolidPaint(data.fill)];
+      } else {
+        vector.fills = [data.fill];
+      }
+    } else if (data.color) {
+      // For consistency with other shape creation functions
+      vector.fills = [createSolidPaint(data.color)];
+    }
+
+    // Stroke
+    if (data.strokes) vector.strokes = data.strokes;
+    if (data.strokeWeight !== undefined) vector.strokeWeight = data.strokeWeight;
+    if (data.strokeAlign) vector.strokeAlign = data.strokeAlign;
+    if (data.strokeCap) vector.strokeCap = data.strokeCap;
+    if (data.strokeJoin) vector.strokeJoin = data.strokeJoin;
+    if (data.dashPattern) vector.dashPattern = data.dashPattern;
+    if (data.strokeMiterLimit) vector.strokeMiterLimit = data.strokeMiterLimit;
+
+    // Corner properties
+    if (data.cornerRadius !== undefined) vector.cornerRadius = data.cornerRadius;
+    if (data.cornerSmoothing !== undefined) vector.cornerSmoothing = data.cornerSmoothing;
+
+    // Blend properties
+    if (data.opacity !== undefined) vector.opacity = data.opacity;
+    if (data.blendMode) vector.blendMode = data.blendMode;
+    if (data.isMask !== undefined) vector.isMask = data.isMask;
+    if (data.effects) vector.effects = data.effects;
+
+    // Layout properties
+    if (data.constraints) vector.constraints = data.constraints;
+    if (data.layoutAlign) vector.layoutAlign = data.layoutAlign;
+    if (data.layoutGrow !== undefined) vector.layoutGrow = data.layoutGrow;
+    if (data.layoutPositioning) vector.layoutPositioning = data.layoutPositioning;
+    if (data.rotation !== undefined) vector.rotation = data.rotation;
+    if (data.layoutSizingHorizontal) vector.layoutSizingHorizontal = data.layoutSizingHorizontal;
+    if (data.layoutSizingVertical) vector.layoutSizingVertical = data.layoutSizingVertical;
+
+    console.log("Vector created successfully:", vector);
+  } catch (error) {
+    console.error("Error creating vector:", error);
+  }
+
+  return vector;
+}
+
+/**
+ * Create a simple vector
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param width Width of vector
+ * @param height Height of vector
+ * @param color Fill color as hex string
+ * @returns Created vector node
+ */
+export function createVector(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  color: string
+): VectorNode {
+  // Use the data-driven function
+  const vector = createVectorFromData({
+    width,
+    height,
+    fill: color
+  });
+
+  // Set position
+  vector.x = x;
+  vector.y = y;
+
+  // Select and focus
+  selectAndFocusNodes(vector);
 
   return vector;
 }

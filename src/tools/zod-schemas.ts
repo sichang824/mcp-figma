@@ -403,6 +403,25 @@ export const starParams = {
   innerRadius: z.number().min(0).max(1).default(0.5).describe("Ratio of inner radius to outer radius (0-1).")
 };
 
+// Vector parameters for Vector Node
+export const vectorParams = {
+  ...positionParams,
+  ...sizeParams,
+  ...baseNodeParams,
+  ...sceneNodeParams,
+  ...blendParams,
+  ...cornerParams,
+  ...geometryParams,
+  ...layoutParams,
+  ...exportParams,
+  ...reactionParams,
+  ...annotationParams,
+  // Vector specific parameters
+  vectorNetwork: z.any().optional().describe("Complete representation of vectors as a network of edges between vertices"),
+  vectorPaths: z.any().optional().describe("Simple representation of vectors as paths"),
+  handleMirroring: z.enum(["NONE", "ANGLE", "ANGLE_AND_LENGTH"]).optional().describe("Whether the vector handles are mirrored or independent")
+};
+
 // Complete schema definitions
 export const createRectangleSchema = z.object({
   ...rectangleParams
@@ -436,4 +455,9 @@ export const createPolygonSchema = z.object({
 // Star schema
 export const createStarSchema = z.object({
   ...starParams
+});
+
+// Vector schema
+export const createVectorSchema = z.object({
+  ...vectorParams
 }); 

@@ -13,7 +13,8 @@ import {
   createLineFromData,
   createPolygonFromData,
   createRectangleFromData,
-  createStarFromData
+  createStarFromData,
+  createVectorFromData
 } from "./creators/shapeCreators";
 import { createTextFromData } from "./creators/textCreator";
 import { hexToRgb } from "./utils/colorUtils";
@@ -36,6 +37,7 @@ const elementCreators: Record<string, ElementCreator> = {
   "create-line": createLineFromData,
   "create-text": createTextFromData,
   "create-star": createStarFromData,
+  "create-vector": createVectorFromData,
   "create-arc": (params: any) => {
     const ellipse = createEllipseFromData(params);
     if (params.arcData || (params.startAngle !== undefined && params.endAngle !== undefined)) {
@@ -134,6 +136,7 @@ async function handleMcpCommand(command: string, params: any) {
       case "create-polygon":
       case "create-line":
       case "create-arc":
+      case "create-vector":
         console.log(`MCP command: Creating ${pluginCommand.substring(7)} with params:`, params);
         result = await createElement(pluginCommand, params);
         break;

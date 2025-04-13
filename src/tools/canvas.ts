@@ -15,6 +15,7 @@ import {
   rectangleParams,
   starParams,
   textParams,
+  vectorParams,
 } from "./zod-schemas.js";
 
 /**
@@ -297,6 +298,67 @@ export function registerCanvasTools(server: McpServer) {
           {
             type: "text",
             text: `Error creating star: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+          },
+          {
+            type: "text",
+            text: `Make sure the Figma plugin is running and connected to the MCP server.`,
+          },
+        ],
+      };
+    }
+  });
+
+  // Create a vector in Figma
+  server.tool("create_vector", vectorParams, async (params) => {
+    try {
+      // Prepare parameters for the plugin
+      const vectorParams = {
+        ...params,
+        vectorNetwork: params.vectorNetwork,
+        vectorPaths: params.vectorPaths,
+        handleMirroring: params.handleMirroring
+      };
+
+      // Send command to Figma plugin
+      const response = await sendCommandToPlugin("create-vector", vectorParams).catch(
+        (error: Error) => {
+          throw error;
+        }
+      );
+
+      if (!response.success) {
+        throw new Error(response.error || "Unknown error");
+      }
+
+      return {
+        content: [
+          { type: "text", text: `# Vector Created Successfully` },
+          {
+            type: "text",
+            text: `A new vector has been created in your Figma canvas.`,
+          },
+          {
+            type: "text",
+            text: `- Position: (${params.x}, ${params.y})\n- Size: ${params.width}×${params.height}px\n- Color: ${params.color}`,
+          },
+          {
+            type: "text",
+            text:
+              response.result && response.result.id
+                ? `Node ID: ${response.result.id}`
+                : `Creation successful`,
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      logError("Error creating vector in Figma", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating vector: ${
               error instanceof Error ? error.message : "Unknown error"
             }`,
           },
