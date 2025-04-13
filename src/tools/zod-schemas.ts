@@ -292,6 +292,15 @@ export const rectangleParams = {
   ...annotationParams,
 };
 
+// Ellipse Arc data for creating arcs and donuts
+const arcDataSchema = z.object({
+  startingAngle: z.number().describe("Starting angle in degrees from 0 to 360"),
+  endingAngle: z.number().describe("Ending angle in degrees from 0 to 360"),
+  innerRadius: z.number().min(0).max(1).describe("Inner radius ratio from 0 to 1")
+});
+
+
+
 // Circle/Ellipse parameters
 export const ellipseParams = {
   ...positionParams,
@@ -304,6 +313,7 @@ export const ellipseParams = {
   ...exportParams,
   ...reactionParams,
   ...annotationParams,
+  arcData: arcDataSchema.optional().describe("Arc data for creating partial ellipses and donuts")
 };
 
 // Text parameters
@@ -353,6 +363,15 @@ export const frameParams = {
   paddingRight: z.number().min(0).optional().describe("Padding on right side"),
   paddingTop: z.number().min(0).optional().describe("Padding on top side"),
   paddingBottom: z.number().min(0).optional().describe("Padding on bottom side"),
+};
+
+
+// Arc parameters (based on ellipse parameters with added angle parameters)
+export const arcParams = {
+  ...ellipseParams,
+  startAngle: z.number().default(0).describe("Starting angle in degrees"),
+  endAngle: z.number().default(180).describe("Ending angle in degrees"),
+  innerRadius: z.number().min(0).max(1).default(0).describe("Inner radius ratio (0-1) for donut shapes")
 };
 
 // Complete schema definitions

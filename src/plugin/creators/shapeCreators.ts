@@ -109,6 +109,15 @@ export function createEllipseFromData(data: any): EllipseNode {
     }
   }
 
+  // Arc data for partial ellipses (arcs/donuts)
+  if (data.arcData) {
+    ellipse.arcData = {
+      startingAngle: data.arcData.startingAngle !== undefined ? data.arcData.startingAngle : 0,
+      endingAngle: data.arcData.endingAngle !== undefined ? data.arcData.endingAngle : 360,
+      innerRadius: data.arcData.innerRadius !== undefined ? data.arcData.innerRadius : 0
+    };
+  }
+
   // Stroke
   if (data.strokes) ellipse.strokes = data.strokes;
   if (data.strokeWeight !== undefined) ellipse.strokeWeight = data.strokeWeight;
@@ -278,6 +287,50 @@ export function createLine(
   selectAndFocusNodes(line);
 
   return line;
+}
+
+/**
+ * Create a simple arc (partial ellipse)
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param width Width of ellipse
+ * @param height Height of ellipse
+ * @param startAngle Starting angle in degrees
+ * @param endAngle Ending angle in degrees
+ * @param innerRadius Inner radius ratio (0-1) for donut shapes
+ * @param color Fill color as hex string
+ * @returns Created ellipse node as an arc
+ */
+export function createArc(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  startAngle: number,
+  endAngle: number,
+  innerRadius: number = 0,
+  color: string
+): EllipseNode {
+  // Use the data-driven function
+  const arc = createEllipseFromData({
+    width,
+    height,
+    fill: color,
+    arcData: {
+      startingAngle: startAngle,
+      endingAngle: endAngle,
+      innerRadius: innerRadius
+    }
+  });
+
+  // Set position
+  arc.x = x;
+  arc.y = y;
+
+  // Select and focus
+  selectAndFocusNodes(arc);
+
+  return arc;
 }
 
 /**

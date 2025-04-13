@@ -8,7 +8,7 @@ import {
   createElementFromData,
   createElementsFromDataArray,
 } from "./creators/elementCreator";
-import { createCircle, createLine, createRectangle } from "./creators/shapeCreators";
+import { createArc, createCircle, createLine, createRectangle } from "./creators/shapeCreators";
 import { createText } from "./creators/textCreator";
 import { hexToRgb } from "./utils/colorUtils";
 import { buildResultObject } from "./utils/nodeUtils";
@@ -41,6 +41,18 @@ figma.ui.onmessage = function (msg) {
       msg.width || 150,
       msg.height || 150,
       msg.color || "#0000ff"
+    );
+  } else if (msg.type === "create-arc") {
+    console.log("Creating arc with params:", msg);
+    createArc(
+      msg.x || 100,
+      msg.y || 100,
+      msg.width || 150,
+      msg.height || 150,
+      msg.startAngle || 0,
+      msg.endAngle || 180,
+      msg.innerRadius || 0,
+      msg.color || "#00ff00"
     );
   } else if (msg.type === "create-line") {
     console.log("Creating line with params:", msg);
@@ -115,6 +127,20 @@ async function handleMcpCommand(command: string, params: any) {
           params.width || 150,
           params.height || 150,
           params.color || "#0000ff"
+        );
+        break;
+
+      case "create-arc":
+        console.log("MCP command: Creating arc with params:", params);
+        result = createArc(
+          params.x || 100,
+          params.y || 100,
+          params.width || 150,
+          params.height || 150,
+          params.startAngle || 0,
+          params.endAngle || 180,
+          params.innerRadius || 0,
+          params.color || "#00ff00"
         );
         break;
 

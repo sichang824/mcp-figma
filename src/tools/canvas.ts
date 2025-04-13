@@ -7,7 +7,13 @@ import {
   sendCommandToPlugin,
 } from "../services/websocket.js";
 import { logError } from "../utils.js";
-import { ellipseParams, rectangleParams, textParams, lineParams } from "./zod-schemas.js";
+import {
+  arcParams,
+  ellipseParams,
+  lineParams,
+  rectangleParams,
+  textParams,
+} from "./zod-schemas.js";
 
 /**
  * Register canvas-related tools with the MCP server
@@ -109,6 +115,67 @@ export function registerCanvasTools(server: McpServer) {
           {
             type: "text",
             text: `Error creating circle: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+          },
+          {
+            type: "text",
+            text: `Make sure the Figma plugin is running and connected to the MCP server.`,
+          },
+        ],
+      };
+    }
+  });
+
+  // Create an arc (partial ellipse) in Figma
+  server.tool("create_arc", arcParams, async (params) => {
+    try {
+      // Prepare parameters for the plugin
+      const arcParams = {
+        ...params,
+        startAngle: params.startAngle,
+        endAngle: params.endAngle,
+        innerRadius: params.innerRadius,
+      };
+
+      // Send command to Figma plugin
+      const response = await sendCommandToPlugin("create-arc", arcParams).catch(
+        (error: Error) => {
+          throw error;
+        }
+      );
+
+      if (!response.success) {
+        throw new Error(response.error || "Unknown error");
+      }
+
+      return {
+        content: [
+          { type: "text", text: `# Arc Created Successfully` },
+          {
+            type: "text",
+            text: `A new arc has been created in your Figma canvas.`,
+          },
+          {
+            type: "text",
+            text: `- Position: (${params.x}, ${params.y})\n- Size: ${params.width}×${params.height}px\n- Angles: ${params.startAngle}° to ${params.endAngle}°\n- Inner radius: ${params.innerRadius}\n- Color: ${params.color}`,
+          },
+          {
+            type: "text",
+            text:
+              response.result && response.result.id
+                ? `Node ID: ${response.result.id}`
+                : `Creation successful`,
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      logError("Error creating arc in Figma", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating arc: ${
               error instanceof Error ? error.message : "Unknown error"
             }`,
           },
