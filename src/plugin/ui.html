@@ -476,11 +476,8 @@
 
       // 监听来自插件代码的消息
       window.addEventListener("message", (event) => {
-        // 安全检查，确保消息来自预期的源
-        if (event.source !== window.parent) return;
-
         const message = event.data.pluginMessage;
-
+        console.log("Received message from plugin:", message);
         // 处理来自插件代码的消息
         if (message && message.type === "mcp-response") {
           addLogEntry(

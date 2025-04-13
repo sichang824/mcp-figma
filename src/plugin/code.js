@@ -943,22 +943,33 @@ async function createElementsFromDataArray(dataArray) {
 }
 
 // src/plugin/code.ts
-figma.showUI(__html__, { width: 300, height: 450 });
+figma.showUI(__html__, { width: 320, height: 500 });
+console.log("Figma MCP Plugin loaded");
 figma.ui.onmessage = function(msg) {
+  console.log("Received message from UI:", msg);
   if (msg.type === "create-rectangle") {
+    console.log("Creating rectangle with params:", msg);
     createRectangle(msg.x || 100, msg.y || 100, msg.width || 150, msg.height || 150, msg.color || "#ff0000");
   } else if (msg.type === "create-circle") {
+    console.log("Creating circle with params:", msg);
     createCircle(msg.x || 100, msg.y || 100, msg.width || 150, msg.height || 150, msg.color || "#0000ff");
   } else if (msg.type === "create-text") {
+    console.log("Creating text with params:", msg);
     createText(msg.x || 100, msg.y || 100, msg.text || "Hello Figma!", msg.fontSize || 24);
   } else if (msg.type === "create-element") {
+    console.log("Creating element with data:", msg.data);
     createElementFromData(msg.data);
   } else if (msg.type === "create-elements") {
+    console.log("Creating multiple elements with data:", msg.data);
     createElementsFromDataArray(msg.data);
   } else if (msg.type === "mcp-command") {
+    console.log("Received MCP command:", msg.command, "with params:", msg.params);
     handleMcpCommand(msg.command, msg.params);
   } else if (msg.type === "cancel") {
+    console.log("Closing plugin");
     figma.closePlugin();
+  } else {
+    console.log("Unknown message type:", msg.type);
   }
 };
 async function handleMcpCommand(command, params) {
@@ -966,24 +977,31 @@ async function handleMcpCommand(command, params) {
   try {
     switch (command) {
       case "create-rectangle":
+        console.log("MCP command: Creating rectangle with params:", params);
         result = createRectangle(params.x || 100, params.y || 100, params.width || 150, params.height || 150, params.color || "#ff0000");
         break;
       case "create-circle":
+        console.log("MCP command: Creating circle with params:", params);
         result = createCircle(params.x || 100, params.y || 100, params.width || 150, params.height || 150, params.color || "#0000ff");
         break;
       case "create-text":
+        console.log("MCP command: Creating text with params:", params);
         result = await createText(params.x || 100, params.y || 100, params.text || "Hello from MCP!", params.fontSize || 24);
         break;
       case "create-element":
+        console.log("MCP command: Creating element with params:", params);
         result = await createElementFromData(params);
         break;
       case "create-elements":
+        console.log("MCP command: Creating multiple elements with params:", params);
         result = await createElementsFromDataArray(params);
         break;
       case "get-selection":
+        console.log("MCP command: Getting current selection");
         result = figma.currentPage.selection;
         break;
       case "modify-rectangle":
+        console.log("MCP command: Modifying rectangle with ID:", params.id);
         if (!params.id)
           throw new Error("Rectangle ID is required");
         const node = figma.getNodeById(params.id);
@@ -1003,23 +1021,28 @@ async function handleMcpCommand(command, params) {
         result = rect;
         break;
       default:
+        console.log("Unknown MCP command:", command);
         throw new Error("Unknown command: " + command);
     }
     const resultObject = buildResultObject(result);
+    console.log("Command result:", resultObject);
     figma.ui.postMessage({
       type: "mcp-response",
       success: true,
       command,
       result: resultObject
     });
+    console.log("Response sent to UI");
     return resultObject;
   } catch (error) {
+    console.error("Error handling MCP command:", error);
     figma.ui.postMessage({
       type: "mcp-response",
       success: false,
       command,
       error: error instanceof Error ? error.message : "Unknown error"
     });
+    console.log("Error response sent to UI");
     throw error;
   }
 }
