@@ -4,6 +4,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebSocketServer, WebSocket as WSWebSocket } from "ws";
 import { z } from "zod";
+import { log, logError } from "../utils.js";
 
 // Store active plugin connection WebSocket
 let activePluginConnection: WSWebSocket | null = null;
@@ -22,20 +23,20 @@ interface PluginResponse {
  */
 export function initializeWebSocketServer(port = 3001) {
   const wss = new WebSocketServer({ port });
-  console.log(`WebSocket server started on port ${port}`);
+  log(`WebSocket server started on port ${port}`);
 
   wss.on("connection", (ws: WSWebSocket) => {
-    console.log("New WebSocket connection");
+    log("New WebSocket connection");
 
     ws.on("message", (message: WSWebSocket.Data) => {
       try {
         const data = JSON.parse(message.toString());
-        console.log("Received WebSocket message:", data);
+        log(`Received WebSocket message: ${JSON.stringify(data)}`);
 
         if (data.type === "figma-plugin-connected") {
           // Store active connection
           activePluginConnection = ws;
-          console.log(`Figma plugin connected: ${data.pluginId || "unknown"}`);
+          log(`Figma plugin connected: ${data.pluginId || "unknown"}`);
         } else if (data.type === "figma-plugin-response") {
           // Handle response from plugin
           const { command, success, result, error } = data;
@@ -47,19 +48,19 @@ export function initializeWebSocketServer(port = 3001) {
           }
         }
       } catch (error) {
-        console.error("Error processing WebSocket message:", error);
+        logError("Error processing WebSocket message", error);
       }
     });
 
     ws.on("close", () => {
-      console.log("WebSocket connection closed");
+      log("WebSocket connection closed");
       if (activePluginConnection === ws) {
         activePluginConnection = null;
       }
     });
 
     ws.on("error", (error: Error) => {
-      console.error("WebSocket error:", error);
+      logError("WebSocket error", error);
     });
   });
 
@@ -170,7 +171,7 @@ export function registerCanvasTools(server: McpServer) {
           ],
         };
       } catch (error: unknown) {
-        console.error("Error creating rectangle in Figma:", error);
+        logError("Error creating rectangle in Figma", error);
         return {
           content: [
             {
@@ -248,7 +249,7 @@ export function registerCanvasTools(server: McpServer) {
           ],
         };
       } catch (error: unknown) {
-        console.error("Error creating circle in Figma:", error);
+        logError("Error creating circle in Figma", error);
         return {
           content: [
             {
@@ -321,7 +322,7 @@ export function registerCanvasTools(server: McpServer) {
           ],
         };
       } catch (error: unknown) {
-        console.error("Error creating text in Figma:", error);
+        logError("Error creating text in Figma", error);
         return {
           content: [
             {
@@ -370,7 +371,7 @@ export function registerCanvasTools(server: McpServer) {
         ],
       };
     } catch (error: unknown) {
-      console.error("Error getting selection in Figma:", error);
+      logError("Error getting selection in Figma", error);
       return {
         content: [
           {
