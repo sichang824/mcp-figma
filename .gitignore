@@ -173,3 +173,29 @@ dist
 
 # Finder (MacOS) folder config
 .DS_Store
+.env.test
+
+# Environment files
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+.npm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-*
+.history/
