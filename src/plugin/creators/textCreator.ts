@@ -14,8 +14,8 @@ export async function createTextFromData(data: any): Promise<TextNode> {
   const text = figma.createText();
   
   // Load font - default to Inter if not specified
-  const fontFamily = data.fontFamily || "Inter";
-  const fontStyle = data.fontStyle || "Regular";
+  const fontFamily = data.fontFamily || (data.fontName?.family) || "Inter";
+  const fontStyle = data.fontStyle || (data.fontName?.style) || "Regular";
   
   // Load the font before setting text
   try {
@@ -28,21 +28,44 @@ export async function createTextFromData(data: any): Promise<TextNode> {
   // Set basic text content
   text.characters = data.text || data.characters || "Text";
   
+  // Position and size
+  if (data.x !== undefined) text.x = data.x;
+  if (data.y !== undefined) text.y = data.y;
+  
   // Text size and dimensions
   if (data.fontSize) text.fontSize = data.fontSize;
   if (data.width) text.resize(data.width, text.height);
   
-  // Text styling
+  // Text style and alignment
   if (data.fontName) text.fontName = data.fontName;
   if (data.textAlignHorizontal) text.textAlignHorizontal = data.textAlignHorizontal;
   if (data.textAlignVertical) text.textAlignVertical = data.textAlignVertical;
   if (data.textAutoResize) text.textAutoResize = data.textAutoResize;
+  if (data.textTruncation) text.textTruncation = data.textTruncation;
+  if (data.maxLines !== undefined) text.maxLines = data.maxLines;
+  
+  // Paragraph styling
   if (data.paragraphIndent) text.paragraphIndent = data.paragraphIndent;
   if (data.paragraphSpacing) text.paragraphSpacing = data.paragraphSpacing;
+  if (data.listSpacing) text.listSpacing = data.listSpacing;
+  if (data.hangingPunctuation !== undefined) text.hangingPunctuation = data.hangingPunctuation;
+  if (data.hangingList !== undefined) text.hangingList = data.hangingList;
+  if (data.autoRename !== undefined) text.autoRename = data.autoRename;
+  
+  // Text styling
   if (data.letterSpacing) text.letterSpacing = data.letterSpacing;
   if (data.lineHeight) text.lineHeight = data.lineHeight;
+  if (data.leadingTrim) text.leadingTrim = data.leadingTrim;
   if (data.textCase) text.textCase = data.textCase;
   if (data.textDecoration) text.textDecoration = data.textDecoration;
+  if (data.textStyleId) text.textStyleId = data.textStyleId;
+  
+  // Text decoration details
+  if (data.textDecorationStyle) text.textDecorationStyle = data.textDecorationStyle;
+  if (data.textDecorationOffset) text.textDecorationOffset = data.textDecorationOffset;
+  if (data.textDecorationThickness) text.textDecorationThickness = data.textDecorationThickness;
+  if (data.textDecorationColor) text.textDecorationColor = data.textDecorationColor;
+  if (data.textDecorationSkipInk !== undefined) text.textDecorationSkipInk = data.textDecorationSkipInk;
   
   // Text fill
   if (data.fills) {
@@ -60,6 +83,28 @@ export async function createTextFromData(data: any): Promise<TextNode> {
     text.hyperlink = data.hyperlink;
   }
   
+  // Layout properties
+  if (data.layoutAlign) text.layoutAlign = data.layoutAlign;
+  if (data.layoutGrow !== undefined) text.layoutGrow = data.layoutGrow;
+  if (data.layoutSizingHorizontal) text.layoutSizingHorizontal = data.layoutSizingHorizontal;
+  if (data.layoutSizingVertical) text.layoutSizingVertical = data.layoutSizingVertical;
+  
+  // Apply text range styles if provided
+  if (data.rangeStyles && Array.isArray(data.rangeStyles)) {
+    applyTextRangeStyles(text, data.rangeStyles);
+  }
+  
+  // Apply common base properties
+  if (data.name) text.name = data.name;
+  if (data.visible !== undefined) text.visible = data.visible;
+  if (data.locked !== undefined) text.locked = data.locked;
+  if (data.opacity !== undefined) text.opacity = data.opacity;
+  if (data.blendMode) text.blendMode = data.blendMode;
+  if (data.effects) text.effects = data.effects;
+  if (data.effectStyleId) text.effectStyleId = data.effectStyleId;
+  if (data.exportSettings) text.exportSettings = data.exportSettings;
+  if (data.constraints) text.constraints = data.constraints;
+  
   return text;
 }
 
@@ -75,12 +120,10 @@ export async function createText(x: number, y: number, content: string, fontSize
   // Use the data-driven function
   const text = await createTextFromData({
     text: content,
-    fontSize
+    fontSize,
+    x,
+    y
   });
-  
-  // Set position
-  text.x = x;
-  text.y = y;
   
   // Select and focus
   selectAndFocusNodes(text);
@@ -109,6 +152,16 @@ export function applyTextRangeStyles(textNode: TextNode, ranges: Array<{start: n
         textNode.setRangeTextCase(range.start, range.end, value as TextCase);
       } else if (property === 'textDecoration') {
         textNode.setRangeTextDecoration(range.start, range.end, value as TextDecoration);
+      } else if (property === 'textDecorationStyle') {
+        textNode.setRangeTextDecorationStyle(range.start, range.end, value as TextDecorationStyle);
+      } else if (property === 'textDecorationOffset') {
+        textNode.setRangeTextDecorationOffset(range.start, range.end, value as TextDecorationOffset);
+      } else if (property === 'textDecorationThickness') {
+        textNode.setRangeTextDecorationThickness(range.start, range.end, value as TextDecorationThickness);
+      } else if (property === 'textDecorationColor') {
+        textNode.setRangeTextDecorationColor(range.start, range.end, value as TextDecorationColor);
+      } else if (property === 'textDecorationSkipInk') {
+        textNode.setRangeTextDecorationSkipInk(range.start, range.end, value as boolean);
       } else if (property === 'letterSpacing') {
         textNode.setRangeLetterSpacing(range.start, range.end, value as LetterSpacing);
       } else if (property === 'lineHeight') {
@@ -119,6 +172,14 @@ export function applyTextRangeStyles(textNode: TextNode, ranges: Array<{start: n
         textNode.setRangeTextStyleId(range.start, range.end, value as string);
       } else if (property === 'indentation') {
         textNode.setRangeIndentation(range.start, range.end, value as number);
+      } else if (property === 'paragraphIndent') {
+        textNode.setRangeParagraphIndent(range.start, range.end, value as number);
+      } else if (property === 'paragraphSpacing') {
+        textNode.setRangeParagraphSpacing(range.start, range.end, value as number);
+      } else if (property === 'listOptions') {
+        textNode.setRangeListOptions(range.start, range.end, value as TextListOptions);
+      } else if (property === 'listSpacing') {
+        textNode.setRangeListSpacing(range.start, range.end, value as number);
       }
     }
   }

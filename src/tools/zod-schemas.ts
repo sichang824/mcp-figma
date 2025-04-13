@@ -325,17 +325,82 @@ export const textParams = {
   ...reactionParams,
   ...annotationParams,
   text: z.string().default("Hello Figma!").describe("The text content"),
+  characters: z.string().optional().describe("Alternative for text content"),
   fontSize: z.number().min(1).default(24).describe("The font size in pixels"),
+  fontFamily: z.string().optional().describe("Font family name"),
+  fontStyle: z.string().optional().describe("Font style (e.g., 'Regular', 'Bold')"),
   fontName: z.object({
     family: z.string().optional().describe("Font family name"),
     style: z.string().optional().describe("Font style (e.g., 'Regular', 'Bold')"),
   }).optional().describe("Font family and style"),
   textAlignHorizontal: z.enum(["LEFT", "CENTER", "RIGHT", "JUSTIFIED"]).optional().describe("Horizontal text alignment"),
   textAlignVertical: z.enum(["TOP", "CENTER", "BOTTOM"]).optional().describe("Vertical text alignment"),
-  letterSpacing: z.number().optional().describe("Letter spacing in pixels"),
-  lineHeight: z.union([z.number(), z.object({ value: z.number(), unit: z.enum(["PIXELS", "PERCENT"]) })]).optional().describe("Line height"),
-  textDecoration: z.enum(["NONE", "UNDERLINE", "STRIKETHROUGH"]).optional().describe("Text decoration"),
+  textAutoResize: z.enum(["NONE", "WIDTH_AND_HEIGHT", "HEIGHT", "TRUNCATE"]).optional().describe("How text box adjusts to fit characters"),
+  textTruncation: z.enum(["DISABLED", "ENDING"]).optional().describe("Whether text will truncate with ellipsis"),
+  maxLines: z.number().nullable().optional().describe("Max number of lines before truncation"),
+  paragraphIndent: z.number().optional().describe("Indentation of paragraphs"),
+  paragraphSpacing: z.number().optional().describe("Vertical distance between paragraphs"),
+  listSpacing: z.number().optional().describe("Vertical distance between lines of a list"),
+  hangingPunctuation: z.boolean().optional().describe("Whether punctuation hangs outside the text box"),
+  hangingList: z.boolean().optional().describe("Whether list counters/bullets hang outside the text box"),
+  autoRename: z.boolean().optional().describe("Whether to update node name based on text content"),
+  letterSpacing: z.union([
+    z.number(),
+    z.object({
+      value: z.number(),
+      unit: z.enum(["PIXELS", "PERCENT"])
+    })
+  ]).optional().describe("Letter spacing between characters"),
+  lineHeight: z.union([
+    z.number(),
+    z.object({
+      value: z.number(),
+      unit: z.enum(["PIXELS", "PERCENT"])
+    })
+  ]).optional().describe("Line height"),
+  leadingTrim: z.enum(["NONE", "CAP_HEIGHT", "BOTH"]).optional().describe("Removal of vertical space above/below text glyphs"),
   textCase: z.enum(["ORIGINAL", "UPPER", "LOWER", "TITLE"]).optional().describe("Text case transformation"),
+  textDecoration: z.enum(["NONE", "UNDERLINE", "STRIKETHROUGH"]).optional().describe("Text decoration"),
+  textDecorationStyle: z.enum(["SOLID", "DASHED", "DOTTED", "WAVY", "DOUBLE"]).optional().describe("Text decoration style"),
+  textDecorationOffset: z.union([
+    z.number(),
+    z.object({
+      value: z.number(),
+      unit: z.enum(["PIXELS", "PERCENT"])
+    })
+  ]).optional().describe("Text decoration offset"),
+  textDecorationThickness: z.union([
+    z.number(),
+    z.object({
+      value: z.number(),
+      unit: z.enum(["PIXELS", "PERCENT"])
+    })
+  ]).optional().describe("Text decoration thickness"),
+  textDecorationColor: z.union([
+    z.object({
+      r: z.number().min(0).max(1),
+      g: z.number().min(0).max(1),
+      b: z.number().min(0).max(1),
+      a: z.number().min(0).max(1).optional()
+    }),
+    z.string()
+  ]).optional().describe("Text decoration color"),
+  textDecorationSkipInk: z.boolean().optional().describe("Whether text decoration skips descenders"),
+  textStyleId: z.string().optional().describe("ID of linked TextStyle object"),
+  hyperlink: z.object({
+    type: z.enum(["URL", "NODE"]),
+    url: z.string().optional(),
+    nodeID: z.string().optional()
+  }).nullable().optional().describe("Hyperlink target"),
+  fill: z.string().optional().describe("Fill color as hex code (shorthand for fills)"),
+  rangeStyles: z.array(
+    z.object({
+      start: z.number().describe("Start index (inclusive)"),
+      end: z.number().describe("End index (exclusive)"),
+      style: z.object({}).passthrough().describe("Style properties to apply to range")
+    })
+  ).optional().describe("Character-level styling for text ranges"),
+  width: z.number().optional().describe("Width of the text box")
 };
 
 // Frame parameters
