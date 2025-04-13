@@ -9,6 +9,8 @@ import {
 import { logError } from "../utils.js";
 import {
   arcParams,
+  elementParams,
+  elementsParams,
   ellipseParams,
   lineParams,
   polygonParams,
@@ -201,11 +203,12 @@ export function registerCanvasTools(server: McpServer) {
       };
 
       // Send command to Figma plugin
-      const response = await sendCommandToPlugin("create-polygon", polygonParams).catch(
-        (error: Error) => {
-          throw error;
-        }
-      );
+      const response = await sendCommandToPlugin(
+        "create-polygon",
+        polygonParams
+      ).catch((error: Error) => {
+        throw error;
+      });
 
       if (!response.success) {
         throw new Error(response.error || "Unknown error");
@@ -257,15 +260,16 @@ export function registerCanvasTools(server: McpServer) {
       const starParams = {
         ...params,
         pointCount: params.pointCount,
-        innerRadius: params.innerRadius
+        innerRadius: params.innerRadius,
       };
 
       // Send command to Figma plugin
-      const response = await sendCommandToPlugin("create-star", starParams).catch(
-        (error: Error) => {
-          throw error;
-        }
-      );
+      const response = await sendCommandToPlugin(
+        "create-star",
+        starParams
+      ).catch((error: Error) => {
+        throw error;
+      });
 
       if (!response.success) {
         throw new Error(response.error || "Unknown error");
@@ -318,15 +322,16 @@ export function registerCanvasTools(server: McpServer) {
         ...params,
         vectorNetwork: params.vectorNetwork,
         vectorPaths: params.vectorPaths,
-        handleMirroring: params.handleMirroring
+        handleMirroring: params.handleMirroring,
       };
 
       // Send command to Figma plugin
-      const response = await sendCommandToPlugin("create-vector", vectorParams).catch(
-        (error: Error) => {
-          throw error;
-        }
-      );
+      const response = await sendCommandToPlugin(
+        "create-vector",
+        vectorParams
+      ).catch((error: Error) => {
+        throw error;
+      });
 
       if (!response.success) {
         throw new Error(response.error || "Unknown error");
@@ -548,5 +553,117 @@ export function registerCanvasTools(server: McpServer) {
         },
       ],
     };
+  });
+
+  // Get all elements from current page or specified page
+  server.tool("get_elements", elementsParams, async (params) => {
+    try {
+      // Send command to Figma plugin
+      const response = await sendCommandToPlugin("get-elements", params).catch(
+        (error: Error) => {
+          throw error;
+        }
+      );
+
+      if (!response.success) {
+        throw new Error(response.error || "Unknown error");
+      }
+
+      const elements = response.result;
+      const count = Array.isArray(elements) ? elements.length : 0;
+      const typeValue = params.type || "ALL";
+      const pageName = params.page_id ? `specified page` : "current page";
+
+      return {
+        content: [
+          { type: "text", text: `# Elements Retrieved` },
+          {
+            type: "text",
+            text: `Found ${count} element${
+              count !== 1 ? "s" : ""
+            } of type ${typeValue} on ${pageName}.`,
+          },
+          {
+            type: "text",
+            text:
+              count > 0
+                ? `Element information: ${JSON.stringify(elements, null, 2)}`
+                : "No elements matched your criteria.",
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      logError("Error getting elements from Figma", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error retrieving elements: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+          },
+          {
+            type: "text",
+            text: `Make sure the Figma plugin is running and connected to the MCP server.`,
+          },
+        ],
+      };
+    }
+  });
+
+  // Get a specific element by ID
+  server.tool("get_element", elementParams, async (params) => {
+    try {
+      // Send command to Figma plugin
+      const response = await sendCommandToPlugin("get-element", params).catch(
+        (error: Error) => {
+          throw error;
+        }
+      );
+
+      if (!response.success) {
+        throw new Error(response.error || "Unknown error");
+      }
+
+      const element = response.result;
+      const isArray = Array.isArray(element);
+      const hasChildren = isArray && element.length > 1;
+
+      return {
+        content: [
+          { type: "text", text: `# Element Retrieved` },
+          {
+            type: "text",
+            text: `Successfully retrieved element with ID: ${params.node_id}`,
+          },
+          {
+            type: "text",
+            text: hasChildren
+              ? `Element and ${element.length - 1} children retrieved.`
+              : `Element information:`,
+          },
+          {
+            type: "text",
+            text: JSON.stringify(element, null, 2),
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      logError("Error getting element from Figma", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error retrieving element: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+          },
+          {
+            type: "text",
+            text: `Make sure the Figma plugin is running and connected to the MCP server.`,
+          },
+        ],
+      };
+    }
   });
 }

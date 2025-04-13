@@ -263,7 +263,7 @@ const annotationParams = {
 };
 
 // Line parameters (width represents length, height is always 0)
-const lineParams = {
+export const lineParams = {
   ...positionParams,
   width: z.number().min(1).default(100).describe("Length of the line in pixels"),
   ...baseNodeParams,
@@ -487,42 +487,19 @@ export const vectorParams = {
   handleMirroring: z.enum(["NONE", "ANGLE", "ANGLE_AND_LENGTH"]).optional().describe("Whether the vector handles are mirrored or independent")
 };
 
-// Complete schema definitions
-export const createRectangleSchema = z.object({
-  ...rectangleParams
-});
+export const elementParams = {
+  node_id: z.string().describe("ID of the element to retrieve"),
+  include_children: z.boolean().optional().default(false).describe("Whether to include children of the element"),
+}
 
-export const createEllipseSchema = z.object({
-  ...ellipseParams
-});
-
-export const createTextSchema = z.object({
-  ...textParams
-});
-
-export const createFrameSchema = z.object({
-  ...frameParams
-});
-
-// Add export for lineParams
-export { lineParams };
-
-// Line schema (a one-dimensional object with width representing length)
-export const createLineSchema = z.object({
-  ...lineParams
-});
-
-// Polygon schema
-export const createPolygonSchema = z.object({
-  ...polygonParams
-});
-
-// Star schema
-export const createStarSchema = z.object({
-  ...starParams
-});
-
-// Vector schema
-export const createVectorSchema = z.object({
-  ...vectorParams
-}); 
+export const elementsParams = {
+  type: z.enum([
+    "ALL", "RECTANGLE", "ELLIPSE", "POLYGON", "STAR", "VECTOR", 
+    "TEXT", "FRAME", "COMPONENT", "INSTANCE", "BOOLEAN_OPERATION", 
+    "GROUP", "SECTION", "SLICE", "LINE", "CONNECTOR", "SHAPE_WITH_TEXT", 
+    "CODE_BLOCK", "STAMP", "WIDGET", "STICKY", "TABLE", "SECTION", "HIGHLIGHT"
+  ]).optional().default("ALL").describe("Type of elements to filter (default: ALL)"),
+  page_id: z.string().optional().describe("ID of page to get elements from (default: current page)"),
+  limit: z.number().int().min(1).max(1000).optional().default(100).describe("Maximum number of elements to return"),
+  include_hidden: z.boolean().optional().default(false).describe("Whether to include hidden elements"),
+};

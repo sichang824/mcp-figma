@@ -164,6 +164,60 @@ async function handleMcpCommand(command: string, params: any) {
         result = figma.currentPage.selection;
         break;
 
+      case "get-elements":
+        console.log("MCP command: Getting elements with params:", params);
+        const page = params.page_id 
+          ? (figma.getNodeById(params.page_id) as PageNode) 
+          : figma.currentPage;
+          
+        if (!page || page.type !== "PAGE") {
+          throw new Error("Invalid page ID or node is not a page");
+        }
+        
+        const nodeType = params.type || "ALL";
+        const limit = params.limit || 100;
+        const includeHidden = params.include_hidden || false;
+        
+        if (nodeType === "ALL") {
+          // Get all nodes, filtered by visibility if needed
+          result = includeHidden 
+            ? page.children.slice(0, limit) 
+            : page.children.filter(node => node.visible).slice(0, limit);
+        } else {
+          // Filter by node type and visibility
+          result = page.findAll(node => {
+            const typeMatch = node.type === nodeType;
+            const visibilityMatch = includeHidden || node.visible;
+            return typeMatch && visibilityMatch;
+          }).slice(0, limit);
+        }
+        break;
+        
+      case "get-element":
+        console.log("MCP command: Getting element with ID:", params.node_id);
+        const node = figma.getNodeById(params.node_id);
+        
+        if (!node) {
+          throw new Error("Element not found with ID: " + params.node_id);
+        }
+        
+        // Check if the node is a valid type for our result
+        if (!['DOCUMENT', 'PAGE'].includes(node.type)) {
+          // For scene nodes with children, include children if requested
+          if (params.include_children && 'children' in node) {
+            result = [node as SceneNode, ...((node as any).children || [])];
+          } else {
+            result = node as SceneNode;
+          }
+        } else if (node.type === 'PAGE') {
+          // Handle page nodes specially
+          result = node as PageNode;
+        } else {
+          // For document or other unsupported node types
+          throw new Error("Unsupported node type: " + node.type);
+        }
+        break;
+
       case "get-pages":
         console.log("MCP command: Getting all pages");
         result = figma.root.children;
@@ -205,11 +259,11 @@ async function handleMcpCommand(command: string, params: any) {
       case "modify-rectangle":
         console.log("MCP command: Modifying rectangle with ID:", params.id);
         if (!params.id) throw new Error("Rectangle ID is required");
-        const node = figma.getNodeById(params.id);
-        if (!node || node.type !== "RECTANGLE")
+        const modifyNode = figma.getNodeById(params.id);
+        if (!modifyNode || modifyNode.type !== "RECTANGLE")
           throw new Error("Invalid rectangle ID");
 
-        const rect = node as RectangleNode;
+        const rect = modifyNode as RectangleNode;
         if (params.x !== undefined) rect.x = params.x;
         if (params.y !== undefined) rect.y = params.y;
         if (params.width !== undefined && params.height !== undefined)
