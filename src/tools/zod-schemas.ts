@@ -299,8 +299,6 @@ const arcDataSchema = z.object({
   innerRadius: z.number().min(0).max(1).describe("Inner radius ratio from 0 to 1")
 });
 
-
-
 // Circle/Ellipse parameters
 export const ellipseParams = {
   ...positionParams,
@@ -365,13 +363,28 @@ export const frameParams = {
   paddingBottom: z.number().min(0).optional().describe("Padding on bottom side"),
 };
 
-
 // Arc parameters (based on ellipse parameters with added angle parameters)
 export const arcParams = {
   ...ellipseParams,
   startAngle: z.number().default(0).describe("Starting angle in degrees"),
   endAngle: z.number().default(180).describe("Ending angle in degrees"),
   innerRadius: z.number().min(0).max(1).default(0).describe("Inner radius ratio (0-1) for donut shapes")
+};
+
+// Polygon parameters
+export const polygonParams = {
+  ...positionParams,
+  ...sizeParams,
+  ...baseNodeParams,
+  ...sceneNodeParams,
+  ...blendParams,
+  ...cornerParams,
+  ...geometryParams,
+  ...layoutParams,
+  ...exportParams,
+  ...reactionParams,
+  ...annotationParams,
+  pointCount: z.number().int().min(3).default(3).describe("Number of sides of the polygon. Must be an integer >= 3.")
 };
 
 // Complete schema definitions
@@ -397,4 +410,9 @@ export { lineParams };
 // Line schema (a one-dimensional object with width representing length)
 export const createLineSchema = z.object({
   ...lineParams
+});
+
+// Polygon schema
+export const createPolygonSchema = z.object({
+  ...polygonParams
 }); 

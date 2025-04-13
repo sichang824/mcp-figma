@@ -11,6 +11,7 @@ import {
   arcParams,
   ellipseParams,
   lineParams,
+  polygonParams,
   rectangleParams,
   textParams,
 } from "./zod-schemas.js";
@@ -176,6 +177,65 @@ export function registerCanvasTools(server: McpServer) {
           {
             type: "text",
             text: `Error creating arc: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+          },
+          {
+            type: "text",
+            text: `Make sure the Figma plugin is running and connected to the MCP server.`,
+          },
+        ],
+      };
+    }
+  });
+
+  // Create a polygon in Figma
+  server.tool("create_polygon", polygonParams, async (params) => {
+    try {
+      // Prepare parameters for the plugin
+      const polygonParams = {
+        ...params,
+        pointCount: params.pointCount,
+      };
+
+      // Send command to Figma plugin
+      const response = await sendCommandToPlugin("create-polygon", polygonParams).catch(
+        (error: Error) => {
+          throw error;
+        }
+      );
+
+      if (!response.success) {
+        throw new Error(response.error || "Unknown error");
+      }
+
+      return {
+        content: [
+          { type: "text", text: `# Polygon Created Successfully` },
+          {
+            type: "text",
+            text: `A new polygon has been created in your Figma canvas.`,
+          },
+          {
+            type: "text",
+            text: `- Position: (${params.x}, ${params.y})\n- Size: ${params.width}×${params.height}px\n- Sides: ${params.pointCount}\n- Color: ${params.color}`,
+          },
+          {
+            type: "text",
+            text:
+              response.result && response.result.id
+                ? `Node ID: ${response.result.id}`
+                : `Creation successful`,
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      logError("Error creating polygon in Figma", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating polygon: ${
               error instanceof Error ? error.message : "Unknown error"
             }`,
           },

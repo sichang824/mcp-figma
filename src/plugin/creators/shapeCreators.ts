@@ -183,7 +183,54 @@ export function createPolygonFromData(data: any): PolygonNode {
     } else {
       polygon.fills = [data.fill];
     }
+  } else if (data.color) {
+    // For consistency with other shape creation functions
+    polygon.fills = [createSolidPaint(data.color)];
   }
+
+  // Stroke
+  if (data.strokes) polygon.strokes = data.strokes;
+  if (data.strokeWeight !== undefined) polygon.strokeWeight = data.strokeWeight;
+  if (data.strokeAlign) polygon.strokeAlign = data.strokeAlign;
+  if (data.strokeCap) polygon.strokeCap = data.strokeCap;
+  if (data.strokeJoin) polygon.strokeJoin = data.strokeJoin;
+  if (data.dashPattern) polygon.dashPattern = data.dashPattern;
+
+  return polygon;
+}
+
+/**
+ * Create a simple polygon
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param width Width of polygon
+ * @param height Height of polygon
+ * @param sides Number of sides (≥ 3)
+ * @param color Fill color as hex string
+ * @returns Created polygon node
+ */
+export function createPolygon(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  sides: number = 3,
+  color: string
+): PolygonNode {
+  // Use the data-driven function
+  const polygon = createPolygonFromData({
+    width,
+    height,
+    pointCount: sides,
+    fill: color
+  });
+
+  // Set position
+  polygon.x = x;
+  polygon.y = y;
+
+  // Select and focus
+  selectAndFocusNodes(polygon);
 
   return polygon;
 }

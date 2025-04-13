@@ -8,7 +8,7 @@ import {
   createElementFromData,
   createElementsFromDataArray,
 } from "./creators/elementCreator";
-import { createArc, createCircle, createLine, createRectangle } from "./creators/shapeCreators";
+import { createArc, createCircle, createLine, createPolygon, createRectangle } from "./creators/shapeCreators";
 import { createText } from "./creators/textCreator";
 import { hexToRgb } from "./utils/colorUtils";
 import { buildResultObject } from "./utils/nodeUtils";
@@ -53,6 +53,16 @@ figma.ui.onmessage = function (msg) {
       msg.endAngle || 180,
       msg.innerRadius || 0,
       msg.color || "#00ff00"
+    );
+  } else if (msg.type === "create-polygon") {
+    console.log("Creating polygon with params:", msg);
+    createPolygon(
+      msg.x || 100,
+      msg.y || 100,
+      msg.width || 150,
+      msg.height || 150,
+      msg.pointCount || 3,
+      msg.color || "#ffcc00"
     );
   } else if (msg.type === "create-line") {
     console.log("Creating line with params:", msg);
@@ -141,6 +151,18 @@ async function handleMcpCommand(command: string, params: any) {
           params.endAngle || 180,
           params.innerRadius || 0,
           params.color || "#00ff00"
+        );
+        break;
+
+      case "create-polygon":
+        console.log("MCP command: Creating polygon with params:", params);
+        result = createPolygon(
+          params.x || 100,
+          params.y || 100,
+          params.width || 150,
+          params.height || 150,
+          params.pointCount || 3,
+          params.color || "#ffcc00"
         );
         break;
 
