@@ -4,7 +4,6 @@
  */
 
 // Import modules
-
 import {
   createElementFromData,
   createElementsFromDataArray,
@@ -50,7 +49,7 @@ figma.ui.onmessage = function (msg) {
     // Create multiple elements at once
     createElementsFromDataArray(msg.data);
   } else if (msg.type === "mcp-command") {
-    // Handle commands from MCP tool
+    // Handle commands from MCP tool via UI
     handleMcpCommand(msg.command, msg.params);
   } else if (msg.type === "cancel") {
     figma.closePlugin();
@@ -137,6 +136,8 @@ async function handleMcpCommand(command: string, params: any) {
       command: command,
       result: resultObject,
     });
+
+    return resultObject;
   } catch (error) {
     // Send error response to UI
     figma.ui.postMessage({
@@ -145,5 +146,7 @@ async function handleMcpCommand(command: string, params: any) {
       command: command,
       error: error instanceof Error ? error.message : "Unknown error",
     });
+
+    throw error;
   }
 }

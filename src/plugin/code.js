@@ -1012,6 +1012,7 @@ async function handleMcpCommand(command, params) {
       command,
       result: resultObject
     });
+    return resultObject;
   } catch (error) {
     figma.ui.postMessage({
       type: "mcp-response",
@@ -1019,5 +1020,6 @@ async function handleMcpCommand(command, params) {
       command,
       error: error instanceof Error ? error.message : "Unknown error"
     });
+    throw error;
   }
 }
