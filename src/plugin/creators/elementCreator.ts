@@ -21,6 +21,38 @@ import {
 } from './containerCreators';
 
 import { createTextFromData } from './textCreator';
+
+import {
+  createBooleanOperationFromData,
+  createConnectorFromData,
+  createShapeWithTextFromData,
+  createCodeBlockFromData,
+  createTableFromData,
+  createWidgetFromData,
+  createMediaFromData
+} from './specialCreators';
+
+import {
+  createImageFromData,
+  createImageFromBytesAsync,
+  createGifFromData,
+  createVideoFromDataAsync,
+  createLinkPreviewFromDataAsync
+} from './imageCreators';
+
+import {
+  createSliceFromData,
+  createPageFromData,
+  createPageDividerFromData,
+  createSlideFromData,
+  createSlideRowFromData
+} from './sliceCreators';
+
+import {
+  createComponentFromNodeData,
+  createComponentSetFromData
+} from './componentCreators';
+
 import { applyCommonProperties, selectAndFocusNodes } from '../utils/nodeUtils';
 
 /**
@@ -76,6 +108,14 @@ export async function createElementFromData(data: any): Promise<SceneNode | null
         element = createComponentFromData(data);
         break;
         
+      case 'componentfromnode':
+        element = createComponentFromNodeData(data);
+        break;
+        
+      case 'componentset':
+        element = createComponentSetFromData(data);
+        break;
+        
       case 'instance':
         element = createInstanceFromData(data);
         break;
@@ -87,6 +127,82 @@ export async function createElementFromData(data: any): Promise<SceneNode | null
       // Text
       case 'text':
         element = await createTextFromData(data);
+        break;
+        
+      // Special types
+      case 'boolean':
+      case 'booleanoperation':
+        element = createBooleanOperationFromData(data);
+        break;
+        
+      case 'connector':
+        element = createConnectorFromData(data);
+        break;
+        
+      case 'shapewithtext':
+        element = createShapeWithTextFromData(data);
+        break;
+        
+      case 'codeblock':
+        element = createCodeBlockFromData(data);
+        break;
+        
+      case 'table':
+        element = createTableFromData(data);
+        break;
+        
+      case 'widget':
+        element = createWidgetFromData(data);
+        break;
+        
+      case 'media':
+        element = createMediaFromData(data);
+        break;
+        
+      // Image and media types
+      case 'image':
+        if (data.bytes || data.file) {
+          element = await createImageFromBytesAsync(data);
+        } else {
+          element = createImageFromData(data);
+        }
+        break;
+        
+      case 'gif':
+        element = createGifFromData(data);
+        break;
+        
+      case 'video':
+        element = await createVideoFromDataAsync(data);
+        break;
+        
+      case 'linkpreview':
+        element = await createLinkPreviewFromDataAsync(data);
+        break;
+        
+      // Page and slice types
+      case 'slice':
+        element = createSliceFromData(data);
+        break;
+        
+      case 'page':
+        // PageNode is not a SceneNode in Figma's type system
+        // So we create it but don't return it through the same path
+        const page = createPageFromData(data);
+        console.log(`Created page: ${page.name}`);
+        // We return null as we can't return a PageNode as SceneNode
+        return null;
+        
+      case 'pagedivider':
+        element = createPageDividerFromData(data);
+        break;
+        
+      case 'slide':
+        element = createSlideFromData(data);
+        break;
+        
+      case 'sliderow':
+        element = createSlideRowFromData(data);
         break;
         
       // Special cases
