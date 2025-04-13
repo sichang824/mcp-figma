@@ -11,7 +11,30 @@ export const figmaFileResource = (server: McpServer): void => {
   server.resource(
     "figma-file",
     new ResourceTemplate("figma-file://{file_key}", {
-      list: "figma-file://",
+      // Define listCallback instead of just providing a string for 'list'
+      listCallback: async () => {
+        try {
+          // Here we would typically get a list of files
+          // For now, return an empty list since we don't have access to "all files"
+          return {
+            contents: [{
+              uri: "figma-file://",
+              title: "Figma Files",
+              description: "List of Figma files you have access to",
+              text: "# Figma Files\n\nTo access a specific file, you need to provide its file key."
+            }]
+          };
+        } catch (error) {
+          console.error('Error listing files:', error);
+          return {
+            contents: [{
+              uri: "figma-file://",
+              title: "Error listing files",
+              text: `Error: ${(error as Error).message}`
+            }]
+          };
+        }
+      }
     }),
     async (uri, { file_key }) => {
       try {
@@ -46,12 +69,10 @@ export const figmaNodeResource = (server: McpServer): void => {
   server.resource(
     "figma-node",
     new ResourceTemplate("figma-node://{file_key}/{node_id}", {
-      list: "figma-node://{file_key}",
-    }),
-    async (uri, { file_key, node_id }) => {
-      try {
-        // If only file_key is provided, list all top-level nodes
-        if (!node_id) {
+      // Define listCallback instead of just providing a string for 'list'
+      listCallback: async (uri, { file_key }) => {
+        try {
+          // If only file_key is provided, list all top-level nodes
           const file = await figmaApi.getFile(file_key);
           
           return {
@@ -62,8 +83,20 @@ export const figmaNodeResource = (server: McpServer): void => {
               text: `# ${node.name}\n\nType: ${node.type}\nID: ${node.id}`
             })) || []
           };
+        } catch (error) {
+          console.error('Error listing nodes:', error);
+          return {
+            contents: [{
+              uri: `figma-node://${file_key}`,
+              title: "Error listing nodes",
+              text: `Error: ${(error as Error).message}`
+            }]
+          };
         }
-        
+      }
+    }),
+    async (uri, { file_key, node_id }) => {
+      try {
         // Get specific node
         const fileNodes = await figmaApi.getFileNodes(file_key, [node_id]);
         const nodeData = fileNodes.nodes[node_id];

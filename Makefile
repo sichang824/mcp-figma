@@ -34,10 +34,7 @@ help:
 	@echo "  make test       - Run tests"
 	@echo "  make clean      - Remove build artifacts and dependencies"
 
-run-mcp-with-token:
-	FIGMA_PERSONAL_ACCESS_TOKEN=temporary_test_token bun run dist/index.js
-
 # Test the MCP server with inspector
 mcp:
 	@echo "Starting MCP test with inspector..."
-	@npx @modelcontextprotocol/inspector bun run mcp -e FIGMA_PERSONAL_ACCESS_TOKEN=temporary_test_token
+	@npx @modelcontextprotocol/inspector bun run mcp -e FIGMA_PERSONAL_ACCESS_TOKEN=${FIGMA_PERSONAL_ACCESS_TOKEN}
