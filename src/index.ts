@@ -11,6 +11,7 @@ import { registerAllResources } from "./resources.js";
 import { initializeWebSocketServer } from "./tools/canvas.js";
 import { registerAllTools } from "./tools/index.js";
 import { log } from "./utils.js";
+import { env } from "./config/env.js";
 
 // Load environment variables
 dotenv.config();
@@ -26,9 +27,7 @@ registerAllTools(server);
 registerAllResources(server);
 
 // Initialize WebSocket server for Figma plugin communication
-const wsPort = process.env.WEBSOCKET_PORT
-  ? parseInt(process.env.WEBSOCKET_PORT)
-  : 3001;
+const wsPort = env.PORT || 3001;
 initializeWebSocketServer(wsPort);
 
 // Start the MCP server with stdio transport
