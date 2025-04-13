@@ -10,6 +10,8 @@ import { registerImageTools } from "./image.js";
 import { registerVersionTools } from "./version.js";
 import { registerSearchTools } from "./search.js";
 import { registerComponentTools } from "./component.js";
+import { registerFrameTools } from "./frame.js";
+import { registerCanvasTools } from "./canvas.js";
 
 /**
  * Registers all tools with the MCP server
@@ -25,4 +27,6 @@ export function registerAllTools(server: McpServer): void {
   registerSearchTools(server);
   registerComponentTools(server);
   registerWidgetTools(server);
+  registerFrameTools(server);
+  registerCanvasTools(server);
 }

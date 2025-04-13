@@ -8,6 +8,11 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerAllTools } from "./tools/index.js";
 import { registerAllResources } from "./resources.js";
+import { initializeWebSocketServer } from "./tools/canvas.js";
+import * as dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
 
 // Create an MCP server
 const server = new McpServer({
@@ -19,8 +24,12 @@ const server = new McpServer({
 registerAllTools(server);
 registerAllResources(server);
 
-// Start receiving messages on stdin and sending messages on stdout
+// Initialize WebSocket server for Figma plugin communication
+const wsPort = process.env.WEBSOCKET_PORT ? parseInt(process.env.WEBSOCKET_PORT) : 3001;
+initializeWebSocketServer(wsPort);
+
+// Start the MCP server with stdio transport
 const transport = new StdioServerTransport();
-await server.connect(transport);
+server.connect(transport);
 
 console.log("Figma MCP Server started");

@@ -18,11 +18,39 @@ import type {
   GetTeamStylesResponse,
   GetFileStylesResponse,
   GetStyleResponse,
-  PostCommentRequest,
+  PostCommentRequestBody,
   PostCommentResponse,
 } from "@figma/rest-api-spec";
 
 const FIGMA_API_BASE_URL = 'https://api.figma.com/v1';
+
+/**
+ * Type definition for CreateFrameOptions
+ */
+export interface CreateFrameOptions {
+  name: string;
+  width: number;
+  height: number;
+  x?: number;
+  y?: number;
+  fills?: Array<{
+    type: string; 
+    color: { r: number; g: number; b: number }; 
+    opacity: number;
+  }>;
+  pageId?: string;
+}
+
+/**
+ * Type definition for the expected response when creating a frame
+ */
+export interface CreateFrameResponse {
+  frame: {
+    id: string;
+    name: string;
+  };
+  success: boolean;
+}
 
 /**
  * Service for interacting with the Figma API
@@ -107,13 +135,51 @@ export class FigmaApiService {
   /**
    * Post a comment to a file
    */
-  async postComment(fileKey: string, data: PostCommentRequest): Promise<PostCommentResponse> {
+  async postComment(fileKey: string, data: PostCommentRequestBody): Promise<PostCommentResponse> {
     const response = await axios.post(
       `${FIGMA_API_BASE_URL}/files/${fileKey}/comments`,
       data,
       { headers: this.headers }
     );
     return response.data;
+  }
+
+  /**
+   * Create a new frame in a Figma file
+   * Note: This uses the Figma Plugin API which requires appropriate permissions
+   */
+  async createFrame(fileKey: string, options: CreateFrameOptions): Promise<CreateFrameResponse> {
+    // Build the frame creation request payload
+    const payload = {
+      node: {
+        type: "FRAME",
+        name: options.name,
+        size: {
+          width: options.width,
+          height: options.height,
+        },
+        position: {
+          x: options.x || 0,
+          y: options.y || 0,
+        },
+        fills: options.fills || [],
+      },
+      pageId: options.pageId,
+    };
+    
+    const response = await axios.post(
+      `${FIGMA_API_BASE_URL}/files/${fileKey}/nodes`,
+      payload,
+      { headers: this.headers }
+    );
+    
+    return {
+      frame: {
+        id: response.data.node.id,
+        name: response.data.node.name,
+      },
+      success: true
+    };
   }
 
   /**
