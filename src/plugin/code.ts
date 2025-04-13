@@ -8,7 +8,7 @@ import {
   createElementFromData,
   createElementsFromDataArray,
 } from "./creators/elementCreator";
-import { createCircle, createRectangle } from "./creators/shapeCreators";
+import { createCircle, createLine, createRectangle } from "./creators/shapeCreators";
 import { createText } from "./creators/textCreator";
 import { hexToRgb } from "./utils/colorUtils";
 import { buildResultObject } from "./utils/nodeUtils";
@@ -41,6 +41,16 @@ figma.ui.onmessage = function (msg) {
       msg.width || 150,
       msg.height || 150,
       msg.color || "#0000ff"
+    );
+  } else if (msg.type === "create-line") {
+    console.log("Creating line with params:", msg);
+    createLine(
+      msg.x || 100,
+      msg.y || 100,
+      msg.width || 150,
+      msg.color || "#000000",
+      msg.rotation || 0,
+      msg.strokeWeight || 1
     );
   } else if (msg.type === "create-text") {
     console.log("Creating text with params:", msg);
@@ -105,6 +115,18 @@ async function handleMcpCommand(command: string, params: any) {
           params.width || 150,
           params.height || 150,
           params.color || "#0000ff"
+        );
+        break;
+
+      case "create-line":
+        console.log("MCP command: Creating line with params:", params);
+        result = createLine(
+          params.x || 100,
+          params.y || 100,
+          params.width || 150,
+          params.color || "#000000",
+          params.rotation || 0,
+          params.strokeWeight || 1
         );
         break;
 

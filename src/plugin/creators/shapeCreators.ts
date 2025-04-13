@@ -213,11 +213,21 @@ export function createStarFromData(data: any): StarNode {
  */
 export function createLineFromData(data: any): LineNode {
   const line = figma.createLine();
+  
+  // Set line length (width)
+  line.resize(data.width || 100, 0); // Line height is always 0
+  
+  // Set rotation if provided
+  if (data.rotation !== undefined) line.rotation = data.rotation;
 
-  // Line properties
+  // Stroke properties
   if (data.strokeWeight) line.strokeWeight = data.strokeWeight;
+  if (data.strokeAlign) line.strokeAlign = data.strokeAlign;
+  if (data.strokeCap) line.strokeCap = data.strokeCap;
+  if (data.strokeJoin) line.strokeJoin = data.strokeJoin;
+  if (data.dashPattern) line.dashPattern = data.dashPattern;
 
-  // Stroke
+  // Stroke color
   if (data.strokes) {
     line.strokes = data.strokes;
   } else if (data.stroke) {
@@ -226,7 +236,46 @@ export function createLineFromData(data: any): LineNode {
     } else {
       line.strokes = [data.stroke];
     }
+  } else if (data.color) {
+    // For consistency with other shape creation functions
+    line.strokes = [createSolidPaint(data.color)];
   }
+
+  return line;
+}
+
+/**
+ * Create a simple line
+ * @param x X coordinate
+ * @param y Y coordinate
+ * @param length Length of the line (width)
+ * @param color Stroke color as hex string
+ * @param rotation Rotation in degrees
+ * @param strokeWeight Stroke thickness
+ * @returns Created line node
+ */
+export function createLine(
+  x: number,
+  y: number,
+  length: number,
+  color: string,
+  rotation: number = 0,
+  strokeWeight: number = 1
+): LineNode {
+  // Use the data-driven function
+  const line = createLineFromData({
+    width: length,
+    stroke: color,
+    strokeWeight: strokeWeight,
+    rotation: rotation
+  });
+
+  // Set position
+  line.x = x;
+  line.y = y;
+
+  // Select and focus
+  selectAndFocusNodes(line);
 
   return line;
 }

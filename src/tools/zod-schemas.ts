@@ -262,6 +262,20 @@ const annotationParams = {
   annotations: z.array(annotationSchema).optional().describe("Annotations on the node"),
 };
 
+// Line parameters (width represents length, height is always 0)
+const lineParams = {
+  ...positionParams,
+  width: z.number().min(1).default(100).describe("Length of the line in pixels"),
+  ...baseNodeParams,
+  ...sceneNodeParams,
+  ...blendParams,
+  ...geometryParams,
+  ...layoutParams,
+  ...exportParams,
+  ...reactionParams,
+  ...annotationParams,
+};
+
 // Combined parameters for rectangles
 export const rectangleParams = {
   ...positionParams,
@@ -356,4 +370,12 @@ export const createTextSchema = z.object({
 
 export const createFrameSchema = z.object({
   ...frameParams
+});
+
+// Add export for lineParams
+export { lineParams };
+
+// Line schema (a one-dimensional object with width representing length)
+export const createLineSchema = z.object({
+  ...lineParams
 }); 

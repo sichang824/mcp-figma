@@ -7,7 +7,7 @@ import {
   sendCommandToPlugin,
 } from "../services/websocket.js";
 import { logError } from "../utils.js";
-import { ellipseParams, rectangleParams, textParams } from "./zod-schemas.js";
+import { ellipseParams, rectangleParams, textParams, lineParams } from "./zod-schemas.js";
 
 /**
  * Register canvas-related tools with the MCP server
@@ -109,6 +109,63 @@ export function registerCanvasTools(server: McpServer) {
           {
             type: "text",
             text: `Error creating circle: ${
+              error instanceof Error ? error.message : "Unknown error"
+            }`,
+          },
+          {
+            type: "text",
+            text: `Make sure the Figma plugin is running and connected to the MCP server.`,
+          },
+        ],
+      };
+    }
+  });
+
+  // Create a line in Figma
+  server.tool("create_line", lineParams, async (params) => {
+    try {
+      // Send command to Figma plugin
+      const response = await sendCommandToPlugin("create-line", params).catch(
+        (error: Error) => {
+          throw error;
+        }
+      );
+
+      if (!response.success) {
+        throw new Error(response.error || "Unknown error");
+      }
+
+      return {
+        content: [
+          { type: "text", text: `# Line Created Successfully` },
+          {
+            type: "text",
+            text: `A new line has been created in your Figma canvas.`,
+          },
+          {
+            type: "text",
+            text: `- Position: (${params.x}, ${params.y})\n- Length: ${params.width}px\n- Color: ${params.color}`,
+          },
+          {
+            type: "text",
+            text: `- Rotation: ${params.rotation || 0}°`,
+          },
+          {
+            type: "text",
+            text:
+              response.result && response.result.id
+                ? `Node ID: ${response.result.id}`
+                : `Creation successful`,
+          },
+        ],
+      };
+    } catch (error: unknown) {
+      logError("Error creating line in Figma", error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error creating line: ${
               error instanceof Error ? error.message : "Unknown error"
             }`,
           },
