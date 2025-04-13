@@ -3,7 +3,7 @@
  */
 
 import { createSolidPaint } from '../utils/colorUtils';
-import { applyCommonProperties, selectAndFocusNodes } from '../utils/nodeUtils';
+import { selectAndFocusNodes } from '../utils/nodeUtils';
 
 /**
  * Create a text node from data
@@ -14,8 +14,8 @@ export async function createTextFromData(data: any): Promise<TextNode> {
   const text = figma.createText();
   
   // Load font - default to Inter if not specified
-  const fontFamily = data.fontFamily || (data.fontName?.family) || "Inter";
-  const fontStyle = data.fontStyle || (data.fontName?.style) || "Regular";
+  const fontFamily = data.fontFamily || (data.fontName.family) || "Inter";
+  const fontStyle = data.fontStyle || (data.fontName.style) || "Regular";
   
   // Load the font before setting text
   try {

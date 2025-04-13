@@ -105,17 +105,6 @@ function createRectangleFromData(data) {
     rect.bottomRightRadius = data.bottomRightRadius;
   return rect;
 }
-function createRectangle(x, y, width, height, color) {
-  const rect = createRectangleFromData({
-    width,
-    height,
-    fill: color
-  });
-  rect.x = x;
-  rect.y = y;
-  selectAndFocusNodes(rect);
-  return rect;
-}
 function createEllipseFromData(data) {
   const ellipse = figma.createEllipse();
   ellipse.resize(data.width || 100, data.height || 100);
@@ -127,6 +116,13 @@ function createEllipseFromData(data) {
     } else {
       ellipse.fills = [data.fill];
     }
+  }
+  if (data.arcData) {
+    ellipse.arcData = {
+      startingAngle: data.arcData.startingAngle !== undefined ? data.arcData.startingAngle : 0,
+      endingAngle: data.arcData.endingAngle !== undefined ? data.arcData.endingAngle : 360,
+      innerRadius: data.arcData.innerRadius !== undefined ? data.arcData.innerRadius : 0
+    };
   }
   if (data.strokes)
     ellipse.strokes = data.strokes;
@@ -142,17 +138,6 @@ function createEllipseFromData(data) {
     ellipse.dashPattern = data.dashPattern;
   return ellipse;
 }
-function createCircle(x, y, width, height, color) {
-  const ellipse = createEllipseFromData({
-    width,
-    height,
-    fill: color
-  });
-  ellipse.x = x;
-  ellipse.y = y;
-  selectAndFocusNodes(ellipse);
-  return ellipse;
-}
 function createPolygonFromData(data) {
   const polygon = figma.createPolygon();
   polygon.resize(data.width || 100, data.height || 100);
@@ -166,7 +151,21 @@ function createPolygonFromData(data) {
     } else {
       polygon.fills = [data.fill];
     }
+  } else if (data.color) {
+    polygon.fills = [createSolidPaint(data.color)];
   }
+  if (data.strokes)
+    polygon.strokes = data.strokes;
+  if (data.strokeWeight !== undefined)
+    polygon.strokeWeight = data.strokeWeight;
+  if (data.strokeAlign)
+    polygon.strokeAlign = data.strokeAlign;
+  if (data.strokeCap)
+    polygon.strokeCap = data.strokeCap;
+  if (data.strokeJoin)
+    polygon.strokeJoin = data.strokeJoin;
+  if (data.dashPattern)
+    polygon.dashPattern = data.dashPattern;
   return polygon;
 }
 function createStarFromData(data) {
@@ -189,8 +188,19 @@ function createStarFromData(data) {
 }
 function createLineFromData(data) {
   const line = figma.createLine();
+  line.resize(data.width || 100, 0);
+  if (data.rotation !== undefined)
+    line.rotation = data.rotation;
   if (data.strokeWeight)
     line.strokeWeight = data.strokeWeight;
+  if (data.strokeAlign)
+    line.strokeAlign = data.strokeAlign;
+  if (data.strokeCap)
+    line.strokeCap = data.strokeCap;
+  if (data.strokeJoin)
+    line.strokeJoin = data.strokeJoin;
+  if (data.dashPattern)
+    line.dashPattern = data.dashPattern;
   if (data.strokes) {
     line.strokes = data.strokes;
   } else if (data.stroke) {
@@ -199,12 +209,79 @@ function createLineFromData(data) {
     } else {
       line.strokes = [data.stroke];
     }
+  } else if (data.color) {
+    line.strokes = [createSolidPaint(data.color)];
   }
   return line;
 }
 function createVectorFromData(data) {
   const vector = figma.createVector();
-  vector.resize(data.width || 100, data.height || 100);
+  try {
+    vector.resize(data.width || 100, data.height || 100);
+    if (data.vectorNetwork) {
+      vector.vectorNetwork = data.vectorNetwork;
+    }
+    if (data.vectorPaths) {
+      vector.vectorPaths = data.vectorPaths;
+    }
+    if (data.handleMirroring) {
+      vector.handleMirroring = data.handleMirroring;
+    }
+    if (data.fills) {
+      vector.fills = data.fills;
+    } else if (data.fill) {
+      if (typeof data.fill === "string") {
+        vector.fills = [createSolidPaint(data.fill)];
+      } else {
+        vector.fills = [data.fill];
+      }
+    } else if (data.color) {
+      vector.fills = [createSolidPaint(data.color)];
+    }
+    if (data.strokes)
+      vector.strokes = data.strokes;
+    if (data.strokeWeight !== undefined)
+      vector.strokeWeight = data.strokeWeight;
+    if (data.strokeAlign)
+      vector.strokeAlign = data.strokeAlign;
+    if (data.strokeCap)
+      vector.strokeCap = data.strokeCap;
+    if (data.strokeJoin)
+      vector.strokeJoin = data.strokeJoin;
+    if (data.dashPattern)
+      vector.dashPattern = data.dashPattern;
+    if (data.strokeMiterLimit)
+      vector.strokeMiterLimit = data.strokeMiterLimit;
+    if (data.cornerRadius !== undefined)
+      vector.cornerRadius = data.cornerRadius;
+    if (data.cornerSmoothing !== undefined)
+      vector.cornerSmoothing = data.cornerSmoothing;
+    if (data.opacity !== undefined)
+      vector.opacity = data.opacity;
+    if (data.blendMode)
+      vector.blendMode = data.blendMode;
+    if (data.isMask !== undefined)
+      vector.isMask = data.isMask;
+    if (data.effects)
+      vector.effects = data.effects;
+    if (data.constraints)
+      vector.constraints = data.constraints;
+    if (data.layoutAlign)
+      vector.layoutAlign = data.layoutAlign;
+    if (data.layoutGrow !== undefined)
+      vector.layoutGrow = data.layoutGrow;
+    if (data.layoutPositioning)
+      vector.layoutPositioning = data.layoutPositioning;
+    if (data.rotation !== undefined)
+      vector.rotation = data.rotation;
+    if (data.layoutSizingHorizontal)
+      vector.layoutSizingHorizontal = data.layoutSizingHorizontal;
+    if (data.layoutSizingVertical)
+      vector.layoutSizingVertical = data.layoutSizingVertical;
+    console.log("Vector created successfully:", vector);
+  } catch (error) {
+    console.error("Error creating vector:", error);
+  }
   return vector;
 }
 
@@ -340,8 +417,8 @@ function createSectionFromData(data) {
 // src/plugin/creators/textCreator.ts
 async function createTextFromData(data) {
   const text = figma.createText();
-  const fontFamily = data.fontFamily || "Inter";
-  const fontStyle = data.fontStyle || "Regular";
+  const fontFamily = data.fontFamily || data.fontName.family || "Inter";
+  const fontStyle = data.fontStyle || data.fontName.style || "Regular";
   try {
     await figma.loadFontAsync({ family: fontFamily, style: fontStyle });
   } catch (error) {
@@ -349,6 +426,10 @@ async function createTextFromData(data) {
     await figma.loadFontAsync({ family: "Inter", style: "Regular" });
   }
   text.characters = data.text || data.characters || "Text";
+  if (data.x !== undefined)
+    text.x = data.x;
+  if (data.y !== undefined)
+    text.y = data.y;
   if (data.fontSize)
     text.fontSize = data.fontSize;
   if (data.width)
@@ -361,18 +442,44 @@ async function createTextFromData(data) {
     text.textAlignVertical = data.textAlignVertical;
   if (data.textAutoResize)
     text.textAutoResize = data.textAutoResize;
+  if (data.textTruncation)
+    text.textTruncation = data.textTruncation;
+  if (data.maxLines !== undefined)
+    text.maxLines = data.maxLines;
   if (data.paragraphIndent)
     text.paragraphIndent = data.paragraphIndent;
   if (data.paragraphSpacing)
     text.paragraphSpacing = data.paragraphSpacing;
+  if (data.listSpacing)
+    text.listSpacing = data.listSpacing;
+  if (data.hangingPunctuation !== undefined)
+    text.hangingPunctuation = data.hangingPunctuation;
+  if (data.hangingList !== undefined)
+    text.hangingList = data.hangingList;
+  if (data.autoRename !== undefined)
+    text.autoRename = data.autoRename;
   if (data.letterSpacing)
     text.letterSpacing = data.letterSpacing;
   if (data.lineHeight)
     text.lineHeight = data.lineHeight;
+  if (data.leadingTrim)
+    text.leadingTrim = data.leadingTrim;
   if (data.textCase)
     text.textCase = data.textCase;
   if (data.textDecoration)
     text.textDecoration = data.textDecoration;
+  if (data.textStyleId)
+    text.textStyleId = data.textStyleId;
+  if (data.textDecorationStyle)
+    text.textDecorationStyle = data.textDecorationStyle;
+  if (data.textDecorationOffset)
+    text.textDecorationOffset = data.textDecorationOffset;
+  if (data.textDecorationThickness)
+    text.textDecorationThickness = data.textDecorationThickness;
+  if (data.textDecorationColor)
+    text.textDecorationColor = data.textDecorationColor;
+  if (data.textDecorationSkipInk !== undefined)
+    text.textDecorationSkipInk = data.textDecorationSkipInk;
   if (data.fills) {
     text.fills = data.fills;
   } else if (data.fill) {
@@ -385,17 +492,83 @@ async function createTextFromData(data) {
   if (data.hyperlink) {
     text.hyperlink = data.hyperlink;
   }
+  if (data.layoutAlign)
+    text.layoutAlign = data.layoutAlign;
+  if (data.layoutGrow !== undefined)
+    text.layoutGrow = data.layoutGrow;
+  if (data.layoutSizingHorizontal)
+    text.layoutSizingHorizontal = data.layoutSizingHorizontal;
+  if (data.layoutSizingVertical)
+    text.layoutSizingVertical = data.layoutSizingVertical;
+  if (data.rangeStyles && Array.isArray(data.rangeStyles)) {
+    applyTextRangeStyles(text, data.rangeStyles);
+  }
+  if (data.name)
+    text.name = data.name;
+  if (data.visible !== undefined)
+    text.visible = data.visible;
+  if (data.locked !== undefined)
+    text.locked = data.locked;
+  if (data.opacity !== undefined)
+    text.opacity = data.opacity;
+  if (data.blendMode)
+    text.blendMode = data.blendMode;
+  if (data.effects)
+    text.effects = data.effects;
+  if (data.effectStyleId)
+    text.effectStyleId = data.effectStyleId;
+  if (data.exportSettings)
+    text.exportSettings = data.exportSettings;
+  if (data.constraints)
+    text.constraints = data.constraints;
   return text;
 }
-async function createText(x, y, content, fontSize) {
-  const text = await createTextFromData({
-    text: content,
-    fontSize
-  });
-  text.x = x;
-  text.y = y;
-  selectAndFocusNodes(text);
-  return text;
+function applyTextRangeStyles(textNode, ranges) {
+  for (const range of ranges) {
+    for (const [property, value] of Object.entries(range.style)) {
+      if (property === "fills") {
+        textNode.setRangeFills(range.start, range.end, value);
+      } else if (property === "fillStyleId") {
+        textNode.setRangeFillStyleId(range.start, range.end, value);
+      } else if (property === "fontName") {
+        textNode.setRangeFontName(range.start, range.end, value);
+      } else if (property === "fontSize") {
+        textNode.setRangeFontSize(range.start, range.end, value);
+      } else if (property === "textCase") {
+        textNode.setRangeTextCase(range.start, range.end, value);
+      } else if (property === "textDecoration") {
+        textNode.setRangeTextDecoration(range.start, range.end, value);
+      } else if (property === "textDecorationStyle") {
+        textNode.setRangeTextDecorationStyle(range.start, range.end, value);
+      } else if (property === "textDecorationOffset") {
+        textNode.setRangeTextDecorationOffset(range.start, range.end, value);
+      } else if (property === "textDecorationThickness") {
+        textNode.setRangeTextDecorationThickness(range.start, range.end, value);
+      } else if (property === "textDecorationColor") {
+        textNode.setRangeTextDecorationColor(range.start, range.end, value);
+      } else if (property === "textDecorationSkipInk") {
+        textNode.setRangeTextDecorationSkipInk(range.start, range.end, value);
+      } else if (property === "letterSpacing") {
+        textNode.setRangeLetterSpacing(range.start, range.end, value);
+      } else if (property === "lineHeight") {
+        textNode.setRangeLineHeight(range.start, range.end, value);
+      } else if (property === "hyperlink") {
+        textNode.setRangeHyperlink(range.start, range.end, value);
+      } else if (property === "textStyleId") {
+        textNode.setRangeTextStyleId(range.start, range.end, value);
+      } else if (property === "indentation") {
+        textNode.setRangeIndentation(range.start, range.end, value);
+      } else if (property === "paragraphIndent") {
+        textNode.setRangeParagraphIndent(range.start, range.end, value);
+      } else if (property === "paragraphSpacing") {
+        textNode.setRangeParagraphSpacing(range.start, range.end, value);
+      } else if (property === "listOptions") {
+        textNode.setRangeListOptions(range.start, range.end, value);
+      } else if (property === "listSpacing") {
+        textNode.setRangeListSpacing(range.start, range.end, value);
+      }
+    }
+  }
 }
 
 // src/plugin/creators/specialCreators.ts
@@ -945,17 +1118,55 @@ async function createElementsFromDataArray(dataArray) {
 // src/plugin/code.ts
 figma.showUI(__html__, { width: 320, height: 500 });
 console.log("Figma MCP Plugin loaded");
-figma.ui.onmessage = function(msg) {
+var elementCreators = {
+  "create-rectangle": createRectangleFromData,
+  "create-circle": createEllipseFromData,
+  "create-ellipse": createEllipseFromData,
+  "create-polygon": createPolygonFromData,
+  "create-line": createLineFromData,
+  "create-text": createTextFromData,
+  "create-star": createStarFromData,
+  "create-vector": createVectorFromData,
+  "create-arc": (params) => {
+    const ellipse = createEllipseFromData(params);
+    if (params.arcData || params.startAngle !== undefined && params.endAngle !== undefined) {
+      ellipse.arcData = {
+        startingAngle: params.startAngle || params.arcData.startingAngle || 0,
+        endingAngle: params.endAngle || params.arcData.endingAngle || 360,
+        innerRadius: params.innerRadius || params.arcData.innerRadius || 0
+      };
+    }
+    return ellipse;
+  }
+};
+async function createElement(type, params) {
+  console.log(`Creating ${type} with params:`, params);
+  const creator = elementCreators[type];
+  if (!creator) {
+    console.error(`Unknown element type: ${type}`);
+    return null;
+  }
+  try {
+    const element = await Promise.resolve(creator(params));
+    if (element && params) {
+      if (params.x !== undefined)
+        element.x = params.x;
+      if (params.y !== undefined)
+        element.y = params.y;
+    }
+    if (element) {
+      selectAndFocusNodes(element);
+    }
+    return element;
+  } catch (error) {
+    console.error(`Error creating ${type}:`, error);
+    return null;
+  }
+}
+figma.ui.onmessage = async function(msg) {
   console.log("Received message from UI:", msg);
-  if (msg.type === "create-rectangle") {
-    console.log("Creating rectangle with params:", msg);
-    createRectangle(msg.x || 100, msg.y || 100, msg.width || 150, msg.height || 150, msg.color || "#ff0000");
-  } else if (msg.type === "create-circle") {
-    console.log("Creating circle with params:", msg);
-    createCircle(msg.x || 100, msg.y || 100, msg.width || 150, msg.height || 150, msg.color || "#0000ff");
-  } else if (msg.type === "create-text") {
-    console.log("Creating text with params:", msg);
-    createText(msg.x || 100, msg.y || 100, msg.text || "Hello Figma!", msg.fontSize || 24);
+  if (elementCreators[msg.type]) {
+    await createElement(msg.type, msg);
   } else if (msg.type === "create-element") {
     console.log("Creating element with data:", msg.data);
     createElementFromData(msg.data);
@@ -975,18 +1186,20 @@ figma.ui.onmessage = function(msg) {
 async function handleMcpCommand(command, params) {
   let result = null;
   try {
-    switch (command) {
+    const pluginCommand = command.replace(/_/g, "-");
+    switch (pluginCommand) {
       case "create-rectangle":
-        console.log("MCP command: Creating rectangle with params:", params);
-        result = createRectangle(params.x || 100, params.y || 100, params.width || 150, params.height || 150, params.color || "#ff0000");
-        break;
       case "create-circle":
-        console.log("MCP command: Creating circle with params:", params);
-        result = createCircle(params.x || 100, params.y || 100, params.width || 150, params.height || 150, params.color || "#0000ff");
+      case "create-polygon":
+      case "create-line":
+      case "create-arc":
+      case "create-vector":
+        console.log(`MCP command: Creating ${pluginCommand.substring(7)} with params:`, params);
+        result = await createElement(pluginCommand, params);
         break;
       case "create-text":
         console.log("MCP command: Creating text with params:", params);
-        result = await createText(params.x || 100, params.y || 100, params.text || "Hello from MCP!", params.fontSize || 24);
+        result = await createElement(pluginCommand, params);
         break;
       case "create-element":
         console.log("MCP command: Creating element with params:", params);
@@ -999,6 +1212,43 @@ async function handleMcpCommand(command, params) {
       case "get-selection":
         console.log("MCP command: Getting current selection");
         result = figma.currentPage.selection;
+        break;
+      case "get-elements":
+        console.log("MCP command: Getting elements with params:", params);
+        const page = params.page_id ? figma.getNodeById(params.page_id) : figma.currentPage;
+        if (!page || page.type !== "PAGE") {
+          throw new Error("Invalid page ID or node is not a page");
+        }
+        const nodeType = params.type || "ALL";
+        const limit = params.limit || 100;
+        const includeHidden = params.include_hidden || false;
+        if (nodeType === "ALL") {
+          result = includeHidden ? page.children.slice(0, limit) : page.children.filter((node2) => node2.visible).slice(0, limit);
+        } else {
+          result = page.findAll((node2) => {
+            const typeMatch = node2.type === nodeType;
+            const visibilityMatch = includeHidden || node2.visible;
+            return typeMatch && visibilityMatch;
+          }).slice(0, limit);
+        }
+        break;
+      case "get-element":
+        console.log("MCP command: Getting element with ID:", params.node_id);
+        const node = figma.getNodeById(params.node_id);
+        if (!node) {
+          throw new Error("Element not found with ID: " + params.node_id);
+        }
+        if (!["DOCUMENT", "PAGE"].includes(node.type)) {
+          if (params.include_children && "children" in node) {
+            result = [node, ...node.children || []];
+          } else {
+            result = node;
+          }
+        } else if (node.type === "PAGE") {
+          result = node;
+        } else {
+          throw new Error("Unsupported node type: " + node.type);
+        }
         break;
       case "get-pages":
         console.log("MCP command: Getting all pages");
@@ -1036,10 +1286,10 @@ async function handleMcpCommand(command, params) {
         console.log("MCP command: Modifying rectangle with ID:", params.id);
         if (!params.id)
           throw new Error("Rectangle ID is required");
-        const node = figma.getNodeById(params.id);
-        if (!node || node.type !== "RECTANGLE")
+        const modifyNode = figma.getNodeById(params.id);
+        if (!modifyNode || modifyNode.type !== "RECTANGLE")
           throw new Error("Invalid rectangle ID");
-        const rect = node;
+        const rect = modifyNode;
         if (params.x !== undefined)
           rect.x = params.x;
         if (params.y !== undefined)

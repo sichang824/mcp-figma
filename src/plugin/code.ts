@@ -42,9 +42,9 @@ const elementCreators: Record<string, ElementCreator> = {
     const ellipse = createEllipseFromData(params);
     if (params.arcData || (params.startAngle !== undefined && params.endAngle !== undefined)) {
       ellipse.arcData = {
-        startingAngle: params.startAngle || params.arcData?.startingAngle || 0,
-        endingAngle: params.endAngle || params.arcData?.endingAngle || 360,
-        innerRadius: params.innerRadius || params.arcData?.innerRadius || 0
+        startingAngle: params.startAngle || params.arcData.startingAngle || 0,
+        endingAngle: params.endAngle || params.arcData.endingAngle || 360,
+        innerRadius: params.innerRadius || params.arcData.innerRadius || 0
       };
     }
     return ellipse;
