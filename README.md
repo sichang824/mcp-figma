@@ -1,3 +1,5 @@
+[![MSeeP.ai Security Assessment Badge](https://mseep.net/pr/sichang824-mcp-figma-badge.png)](https://mseep.ai/app/sichang824-mcp-figma)
+
 # Figma MCP Server
 
 A Figma API server implementation based on Model Context Protocol (MCP), supporting Figma plugin and widget integration.
